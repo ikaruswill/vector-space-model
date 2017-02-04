@@ -4,6 +4,16 @@ import sys
 import os
 import io
 
+def build_dict(docs):
+	dictionary = set()
+	for doc_id, doc in docs.items():
+		dictionary.update(doc)
+
+	return dictionary
+
+def populate_postings():
+	pass
+
 def load_data(dir_doc):
 	docs = {}
 	for dirpath, dirnames, filenames in os.walk(dir_doc):
@@ -46,3 +56,4 @@ if __name__ == '__main__':
 
 	docs = load_data(dir_doc)
 	docs = preprocess(docs)
+	dictionary = build_dict(docs)
