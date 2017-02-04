@@ -14,6 +14,13 @@ def load_data(dir_doc):
 
 	return docs
 
+def preprocess(docs):
+	processed_docs = {}
+	for doc_id, doc in docs.items():
+		processed_docs[doc_id] = word_tokenize(doc)
+
+	return processed_docs
+
 def usage():
 	print("usage: " + sys.argv[0] + " -i directory-of-documents -d dictionary-file -p postings-file")
 
@@ -38,3 +45,4 @@ if __name__ == '__main__':
 		sys.exit(2)
 
 	docs = load_data(dir_doc)
+	docs = preprocess(docs)
