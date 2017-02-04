@@ -25,7 +25,7 @@ def build_postings(dictionary):
 	return postings
 
 def populate_postings(docs, postings):
-	for doc_id, doc in docs.items():
+	for doc_id, doc in sorted(docs.items(), key=lambda x:int(operator.itemgetter(0)(x))):
 		for term in set(doc):
 			postings[term].append(doc_id)
 
