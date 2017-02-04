@@ -37,4 +37,4 @@ if __name__ == '__main__':
 		usage()
 		sys.exit(2)
 
-	load_data(dir_doc)
+	docs = load_data(dir_doc)
