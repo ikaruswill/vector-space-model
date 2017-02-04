@@ -3,6 +3,7 @@ import getopt
 import sys
 import os
 import io
+import string
 
 def build_dict(docs):
 	dictionary = set()
@@ -37,9 +38,11 @@ def load_data(dir_doc):
 	return docs
 
 def preprocess(docs):
+	punctuations = set(string.punctuation)
 	processed_docs = {}
 	for doc_id, doc in docs.items():
 		processed_docs[doc_id] = set(word_tokenize(doc.lower()))
+		processed_docs[doc_id].difference_update(punctuations)
 
 	return processed_docs
 
