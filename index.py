@@ -4,6 +4,15 @@ import sys
 import os
 import io
 
+def load_data(dir_doc):
+	docs = {}
+	for dirpath, dirnames, filenames in os.walk(dir_doc):
+		for name in filenames:
+			file = os.path.join(dirpath, name)
+			with io.open(file, 'r+') as f:
+				docs[name] = f.read()
+
+	return docs
 
 def usage():
 	print("usage: " + sys.argv[0] + " -i directory-of-documents -d dictionary-file -p postings-file")
@@ -27,3 +36,5 @@ if __name__ == '__main__':
 	if dir_doc == None or dict_file == None or postings_file == None:
 		usage()
 		sys.exit(2)
+
+	load_data(dir_doc)
