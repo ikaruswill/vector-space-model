@@ -21,8 +21,10 @@ def build_postings(dictionary):
 
 	return postings
 
-def populate_postings(docs, dictionary, postings):
-	pass
+def populate_postings(docs, postings):
+	for doc_id, doc in docs.items():
+		for term in set(doc):
+			postings[term].append(doc_id)
 
 def load_data(dir_doc):
 	docs = {}
@@ -68,3 +70,4 @@ if __name__ == '__main__':
 	docs = preprocess(docs)
 	dictionary = build_dict(docs)
 	postings = build_postings(dictionary)
+	populate_postings(docs, postings)
