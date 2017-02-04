@@ -9,6 +9,9 @@ def build_dict(docs):
 	for doc_id, doc in docs.items():
 		dictionary.update(doc)
 
+	dictionary = list(dictionary)
+	dictionary.sort()
+
 	return dictionary
 
 def build_postings(dictionary):
