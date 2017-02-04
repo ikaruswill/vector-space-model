@@ -39,7 +39,7 @@ def load_data(dir_doc):
 def preprocess(docs):
 	processed_docs = {}
 	for doc_id, doc in docs.items():
-		processed_docs[doc_id] = word_tokenize(doc)
+		processed_docs[doc_id] = word_tokenize(doc.lower())
 
 	return processed_docs
 
