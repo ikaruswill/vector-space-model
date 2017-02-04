@@ -34,7 +34,7 @@ def load_data(dir_doc):
 	for dirpath, dirnames, filenames in os.walk(dir_doc):
 		for name in filenames:
 			file = os.path.join(dirpath, name)
-			with io.open(file, 'r+') as f:
+			with io.open(file, 'r') as f:
 				docs[name] = f.read()
 
 	return docs
@@ -78,8 +78,9 @@ if __name__ == '__main__':
 	postings = build_postings(dictionary)
 	populate_postings(docs, postings)
 
-	with io.open(dict_file, 'wb+') as f:
+
+	with io.open(dict_file, 'wb') as f:
 		pickle.dump(dictionary, f)
 
-	with io.open(postings_file, 'wb+') as f:
+	with io.open(postings_file, 'wb') as f:
 		pickle.dump(postings, f)
