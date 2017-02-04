@@ -5,6 +5,7 @@ import sys
 import os
 import io
 import string
+import pickle
 
 def build_dict(docs):
 	dictionary = set()
@@ -76,3 +77,9 @@ if __name__ == '__main__':
 	dictionary = build_dict(docs)
 	postings = build_postings(dictionary)
 	populate_postings(docs, postings)
+
+	with io.open(dict_file, 'wb+') as f:
+		pickle.dump(dictionary, f)
+
+	with io.open(postings_file, 'wb+') as f:
+		pickle.dump(postings, f)
