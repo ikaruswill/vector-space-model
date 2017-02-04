@@ -1,4 +1,5 @@
 from nltk.tokenize import word_tokenize, sent_tokenize
+from nltk.stem.porter import PorterStemmer
 import getopt
 import sys
 import os
@@ -38,10 +39,11 @@ def load_data(dir_doc):
 	return docs
 
 def preprocess(docs):
+	stemmer = PorterStemmer()
 	punctuations = set(string.punctuation)
 	processed_docs = {}
 	for doc_id, doc in docs.items():
-		processed_docs[doc_id] = set(word_tokenize(doc.lower()))
+		processed_docs[doc_id] = set([stemmer.stem(token) for token in word_tokenize(doc.lower())])
 		processed_docs[doc_id].difference_update(punctuations)
 
 	return processed_docs
