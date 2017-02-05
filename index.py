@@ -6,6 +6,7 @@ import os
 import io
 import string
 import pickle
+import operator
 
 def build_dict(docs):
 	dictionary = set()
