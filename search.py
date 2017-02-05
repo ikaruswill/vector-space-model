@@ -1,6 +1,7 @@
 import io
 import getopt
 import sys
+import pickle
 
 def usage():
 	print("usage: " + sys.argv[0] + " -d dictionary-file -p postings-file -q file-of-queries -o output-file-of-results")
@@ -27,3 +28,9 @@ if __name__ == '__main__':
 		usage()
 		sys.exit(2)
 
+	with io.open(dict_file, 'rb') as f:
+		dictionary = pickle.load(f)
+	
+	with io.open(postings_file, 'rb') as f:
+		postings = pickle.load(f)
+		skip_pointers = pickle.load(f)
