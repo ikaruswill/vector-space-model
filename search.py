@@ -19,7 +19,7 @@ if __name__ == '__main__':
 			output_file = a
 		else:
 			assert False, "unhandled option"
-	if dir_doc == None or dict_file == None or postings_file == None:
+	if dict_file == None or postings_file == None or query_file == None or output_file == None:
 		usage()
 		sys.exit(2)
 
