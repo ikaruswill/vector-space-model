@@ -35,3 +35,12 @@ if __name__ == '__main__':
 	with io.open(postings_file, 'rb') as f:
 		postings = pickle.load(f)
 		skip_pointers = pickle.load(f)
+
+	with io.open(query_file, 'r') as f:
+		queries = f.readlines()
+
+	stemmer = PorterStemmer()
+
+	for query in queries:
+		print('QUERY RESULT')
+		print(postings[stemmer.stem(query)])
