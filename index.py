@@ -87,7 +87,7 @@ def save_postings(postings):
 		sizes.append(len(pickled_posting))
 		pickled_postings.append(pickled_posting)
 
-	with io.open(postings_file, 'wb') as f:
+	with io.open(postings_path, 'wb') as f:
 		pickle.dump(sizes, f)
 		for pickled_posting in pickled_postings:
 			f.write(pickled_posting)
@@ -108,7 +108,7 @@ def usage():
 	print("usage: " + sys.argv[0] + " -i directory-of-documents -d dictionary-file -p postings-file")
 
 if __name__ == '__main__':
-	dir_doc = dict_file = postings_file = None
+	dir_doc = dict_path = postings_path = None
 	try:
 		opts, args = getopt.getopt(sys.argv[1:], 'i:d:p:')
 	except getopt.GetoptError as err:
@@ -118,12 +118,12 @@ if __name__ == '__main__':
 		if o == '-i':
 			dir_doc = a
 		elif o == '-d':
-			dict_file = a
+			dict_path = a
 		elif o == '-p':
-			postings_file = a
+			postings_path = a
 		else:
 			assert False, "unhandled option"
-	if dir_doc == None or dict_file == None or postings_file == None:
+	if dir_doc == None or dict_path == None or postings_path == None:
 		usage()
 		sys.exit(2)
 
@@ -134,7 +134,7 @@ if __name__ == '__main__':
 	populate_skip_postings(docs, postings)
 	# skip_pointers = build_skip_pointers(postings)
 
-	with io.open(dict_file, 'wb') as f:
+	with io.open(dict_path, 'wb') as f:
 		pickle.dump(dictionary, f)
 
 	save_postings(postings)
