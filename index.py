@@ -10,8 +10,10 @@ import math
 import operator
 
 # Dictionary is a sorted list of terms
-# Postings is a dictionary of {term:{interval: x, size: n, doc_ids: list(doc_ids)}}
+# Postings is a dictionary of {term:{interval: x, doc_ids: list(doc_ids)}}
 
+# takes in a dict of doc_id: doc items
+# returns a sorted list of non-duplicated terms in collection
 def build_dict(docs):
 	dictionary = set()
 	for doc_id, doc in docs.items():
@@ -23,11 +25,13 @@ def build_dict(docs):
 	return dictionary
 
 def build_postings(dictionary):
+# takes in a list of terms
+# returns a dict of term: posting dict objects
+def build_postings(sorted_dict):
 	postings = {}
 	for term in dictionary:
 		postings[term] = {}
 		postings[term]['interval'] = 0
-		postings[term]['size'] = 0
 		postings[term]['doc_ids'] = []
 
 	return postings
@@ -54,8 +58,8 @@ def populate_skip_postings(docs, postings):
 			postings[term]['doc_ids'].append(doc_id)
 
 	for term, posting in postings.items():
-		postings[term]['size'] = len(postings[term]['doc_ids'])
-		postings[term]['interval'] = math.floor((postings[term]['size'] - 1) / math.floor(math.sqrt(postings[term]['size'])))
+		posting_len = len(postings[term]['doc_ids'])
+		postings[term]['interval'] = math.floor((posting_len - 1) / math.floor(math.sqrt(posting_len)))
 
 def load_data(dir_doc):
 	docs = {}
@@ -66,6 +70,21 @@ def load_data(dir_doc):
 				docs[name] = f.read()
 
 	return docs
+
+def save_postings(postings):
+	sizes = []
+	pickled_postings = []
+
+	# Generate posting objects
+	for term, posting in postings.items():
+		pickled_posting = pickle.dumps(posting)
+		sizes.append(len(pickled_posting))
+		pickled_postings.append(pickled_posting)
+
+	with io.open(postings_file, 'wb') as f:
+		pickle.dump(sizes, f)
+		for pickled_posting in pickled_postings:
+			f.write(pickled_posting)
 
 def preprocess(docs):
 	stemmer = PorterStemmer()
@@ -107,10 +126,8 @@ if __name__ == '__main__':
 	populate_skip_postings(docs, postings)
 	# skip_pointers = build_skip_pointers(postings)
 
-
 	with io.open(dict_file, 'wb') as f:
 		pickle.dump(dictionary, f)
 
-	with io.open(postings_file, 'wb') as f:
-		pickle.dump(postings, f)
-		# pickle.dump(skip_pointers, f)
+	save_postings(postings)
+
