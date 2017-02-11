@@ -32,11 +32,15 @@ if __name__ == '__main__':
 		dictionary = pickle.load(f)
 
 	# TODO: Implement seeking and reading don't read entirely
-	with io.open(postings_file, 'rb') as f:
-		postings = pickle.load(f)
+	
+	# load postings object sizes to calculate seek offset from current position of file
+	postings_file = io.open(postings_path, 'rb')
+	postings_sizes = pickle.load(postings_file)
 
 	with io.open(query_path, 'r') as f:
 		queries = f.readlines()
+
+	postings_file.close()
 
 	stemmer = PorterStemmer()
 
