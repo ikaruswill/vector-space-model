@@ -31,10 +31,9 @@ if __name__ == '__main__':
 	with io.open(dict_file, 'rb') as f:
 		dictionary = pickle.load(f)
 	
-	# Implement seeking and reading don't read entirely
+	# TODO: Implement seeking and reading don't read entirely
 	with io.open(postings_file, 'rb') as f:
 		postings = pickle.load(f)
-		skip_pointers = pickle.load(f)
 
 	with io.open(query_file, 'r') as f:
 		queries = f.readlines()
