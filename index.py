@@ -9,6 +9,9 @@ import pickle
 import math
 import operator
 
+# Dictionary is a sorted list of terms
+# Postings is a dictionary of {term:{interval: x, size: n, doc_ids: list(doc_ids)}}
+
 def build_dict(docs):
 	dictionary = set()
 	for doc_id, doc in docs.items():
@@ -22,30 +25,37 @@ def build_dict(docs):
 def build_postings(dictionary):
 	postings = {}
 	for term in dictionary:
-		postings[term] = []
+		postings[term] = {}
+		postings[term]['interval'] = 0
+		postings[term]['size'] = 0
+		postings[term]['doc_ids'] = []
 
 	return postings
 
-def build_skip_pointers(postings):
-	skip_pointers = {}
-	for term, posting_list in postings.items():
-		postings_len = len(posting_list)
-		if postings_len > 3:
-			pointer_count = math.floor(math.sqrt(postings_len))
-			pointer_interval = math.floor(postings_len / pointer_count)
-			pointers = []
-			skip_pointers[term] = [i for i in range(pointer_interval - 1, postings_len, pointer_interval)]
-		elif postings_len == 3:
-			skip_pointers[term] = [2]
-		else:
-			skip_pointers[term] = []
+# def build_skip_pointers(postings):
+# 	skip_pointers = {}
+# 	for term, posting_list in postings.items():
+# 		postings_len = len(posting_list)
+# 		if postings_len > 3:
+# 			pointer_count = math.floor(math.sqrt(postings_len))
+# 			pointer_interval = math.floor(postings_len / pointer_count)
+# 			pointers = []
+# 			skip_pointers[term] = [i for i in range(pointer_interval - 1, postings_len, pointer_interval)]
+# 		elif postings_len == 3:
+# 			skip_pointers[term] = [2]
+# 		else:
+# 			skip_pointers[term] = []
 
-	return skip_pointers
+# 	return skip_pointers
 
-def populate_postings(docs, postings):
+def populate_skip_postings(docs, postings):
 	for doc_id, doc in sorted(docs.items(), key=lambda x:int(operator.itemgetter(0)(x))):
 		for term in set(doc):
-			postings[term].append(doc_id)
+			postings[term]['doc_ids'].append(doc_id)
+
+	for term, posting in postings.items():
+		postings[term]['size'] = len(postings[term]['doc_ids'])
+		postings[term]['interval'] = math.floor((postings[term]['size'] - 1) / math.floor(math.sqrt(postings[term]['size'])))
 
 def load_data(dir_doc):
 	docs = {}
@@ -94,8 +104,8 @@ if __name__ == '__main__':
 	docs = preprocess(docs)
 	dictionary = build_dict(docs)
 	postings = build_postings(dictionary)
-	populate_postings(docs, postings)
-	skip_pointers = build_skip_pointers(postings)
+	populate_skip_postings(docs, postings)
+	# skip_pointers = build_skip_pointers(postings)
 
 
 	with io.open(dict_file, 'wb') as f:
@@ -103,4 +113,4 @@ if __name__ == '__main__':
 
 	with io.open(postings_file, 'wb') as f:
 		pickle.dump(postings, f)
-		pickle.dump(skip_pointers, f)
+		# pickle.dump(skip_pointers, f)
