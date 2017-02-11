@@ -24,10 +24,9 @@ def build_dict(docs):
 
 	return dictionary
 
-def build_postings(dictionary):
 # takes in a list of terms
 # returns a dict of term: posting dict objects
-def build_postings(sorted_dict):
+def build_postings(dictionary):
 	postings = {}
 	for term in dictionary:
 		postings[term] = {}
