@@ -52,6 +52,9 @@ def build_postings(sorted_dict):
 
 # 	return skip_pointers
 
+# takes in dict of doc_id:set(processed_doc) 
+# takes in initialized postings dict of term: posting_dict
+# returns dict of postings term: posting_dict; posting_dict is a dict {'interval': x, 'doc_ids': [doc_ids]}
 def populate_skip_postings(docs, postings):
 	for doc_id, doc in sorted(docs.items(), key=lambda x:int(operator.itemgetter(0)(x))):
 		for term in set(doc):
@@ -61,6 +64,8 @@ def populate_skip_postings(docs, postings):
 		posting_len = len(postings[term]['doc_ids'])
 		postings[term]['interval'] = math.floor((posting_len - 1) / math.floor(math.sqrt(posting_len)))
 
+# takes in directory of corpus
+# returns dict of doc_id: string(doc)
 def load_data(dir_doc):
 	docs = {}
 	for dirpath, dirnames, filenames in os.walk(dir_doc):
@@ -71,6 +76,8 @@ def load_data(dir_doc):
 
 	return docs
 
+# takes in dict of term: posting_dict. posting_dict is a dict {'interval': x, 'doc_ids': [doc_ids]}
+# saves list of object sizes in bytes in sorted order of terms as first object, saves each posting_dict as separate, subsequent objects.
 def save_postings(postings):
 	sizes = []
 	pickled_postings = []
@@ -86,6 +93,8 @@ def save_postings(postings):
 		for pickled_posting in pickled_postings:
 			f.write(pickled_posting)
 
+# takes in dict of doc_id: string(doc)
+# returns tokenized, stemmed, punctuation-filtered dict of doc_id: set(preprocessed_tokens)
 def preprocess(docs):
 	stemmer = PorterStemmer()
 	punctuations = set(string.punctuation)
