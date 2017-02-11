@@ -1,7 +1,10 @@
+from nltk.stem.porter import PorterStemmer
 import io
 import getopt
 import sys
 import pickle
+
+import random
 
 def usage():
 	print("usage: " + sys.argv[0] + " -d dictionary-file -p postings-file -q file-of-queries -o output-file-of-results")
@@ -47,3 +50,12 @@ if __name__ == '__main__':
 	for query in queries:
 		print('QUERY RESULT')
 		print(postings[stemmer.stem(query)])
+
+	for i in range(3):
+		print(random.choice(list(dictionary)))
+
+	for i in range(3):
+		term, ids = random.choice(list(postings.items()))
+		while len(ids) < 4:
+			term, ids = random.choice(list(postings.items()))
+		print(term, ' ', ids, ' P: ', skip_pointers[term])

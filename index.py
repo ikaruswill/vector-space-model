@@ -9,6 +9,8 @@ import pickle
 import math
 import operator
 
+import random
+
 # Dictionary is a sorted list of terms
 # Postings is a dictionary of {term:{interval: x, doc_ids: list(doc_ids)}}
 
@@ -139,3 +141,14 @@ if __name__ == '__main__':
 
 	save_postings(postings)
 
+	for i in range(3):
+		print(random.choice(list(docs.items())))
+
+	for i in range(3):
+		print(random.choice(list(dictionary)))
+
+	for i in range(3):
+		term, posting = random.choice(list(postings.items()))
+		while len(posting['doc_ids']) < 4:
+			term, posting = random.choice(list(postings.items()))
+		print(term, ' ', posting)
