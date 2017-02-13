@@ -53,7 +53,7 @@ def build_postings(dictionary):
 
 # 	return skip_pointers
 
-# takes in dict of doc_id:set(processed_doc) 
+# takes in dict of doc_id:set(processed_doc)
 # takes in initialized postings dict of term: posting_dict
 # returns dict of postings term: posting_dict; posting_dict is a dict {'interval': x, 'doc_ids': [doc_ids]}
 def populate_skip_postings(docs, postings):
@@ -84,9 +84,11 @@ def save_postings(postings):
 	pickled_postings = []
 
 	# Generate posting objects
+	cumulative = 0
 	for term, posting in postings.items():
 		pickled_posting = pickle.dumps(posting)
-		sizes.append(len(pickled_posting))
+		cumulative += len(pickled_posting)
+		sizes.append(cumulative)
 		pickled_postings.append(pickled_posting)
 
 	with io.open(postings_path, 'wb') as f:
