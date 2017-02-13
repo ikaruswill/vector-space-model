@@ -83,7 +83,7 @@ def save_postings(postings):
 
 	# Generate posting objects
 	cumulative = 0
-	for term, posting in postings.items():
+	for term, posting in sorted(postings.items()):
 		pickled_posting = pickle.dumps(posting)
 		cumulative += len(pickled_posting)
 		sizes.append(cumulative)
