@@ -43,7 +43,7 @@ if __name__ == '__main__':
 	starting_byte_offset = postings_file.tell()
 
 	index_of_term = dictionary.index("bill")
-	posting_offset = 0 if index_of_term - 1 < 0 else postings_sizes[index_of_term - 1]
+	posting_offset = postings_sizes[index_of_term]
 
 	print(pickle.load(postings_file))
 	print(pickle.load(postings_file))
