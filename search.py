@@ -35,9 +35,6 @@ if __name__ == '__main__':
 	with io.open(dict_path, 'rb') as f:
 		dictionary = pickle.load(f)
 
-	for i in range(100):
-		print(dictionary[i])
-
 	# TODO: Implement seeking and reading don't read entirely
 
 	# load postings object sizes to calculate seek offset from current position of file
@@ -83,11 +80,6 @@ if __name__ == '__main__':
 
 	postings_file.close()
 
+	print('++ 3 Random items in dictionary ++')
 	for i in range(3):
-		print(random.choice(list(dictionary)))
-
-	for i in range(3):
-		term, ids = random.choice(list(postings.items()))
-		while len(ids) < 4:
-			term, ids = random.choice(list(postings.items()))
-		print(term, ' ', ids, ' P: ', skip_pointers[term])
+		print(random.choice(list(dictionary.items())))
