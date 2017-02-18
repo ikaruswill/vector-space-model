@@ -86,7 +86,7 @@ def load_data(dir_doc):
 def save_dictionary(dictionary, postings):
 	with io.open(dict_path, 'wb') as f:
 		pickle.dump(dictionary, f)
-		pickle.dump(doc_freq, f)
+		
 
 # takes in dict of term: posting_dict. posting_dict is a dict {'interval': x, 'doc_ids': [doc_ids]}
 # saves list of object sizes in bytes in sorted order of terms as first object, saves each posting_dict as separate, subsequent objects.
@@ -151,5 +151,5 @@ if __name__ == '__main__':
 	populate_doc_freq(dictionary, postings)
 	# skip_pointers = build_skip_pointers(postings)
 
-	save_dictionary(dictionary, doc_freq)
+	save_dictionary(dictionary)
 	save_postings(postings)
