@@ -28,7 +28,7 @@ def build_dict(docs):
 
 # takes in a list of terms
 # returns a dict of term: posting dict objects
-def build_postings(dictionary):
+def init_postings(dictionary):
 	postings = {}
 	for term in dictionary:
 		postings[term] = {}
@@ -56,7 +56,7 @@ def build_postings(dictionary):
 # takes in dict of doc_id:set(processed_doc)
 # takes in initialized postings dict of term: posting_dict
 # returns dict of postings term: posting_dict; posting_dict is a dict {'interval': x, 'doc_ids': [doc_ids]}
-def populate_skip_postings(docs, postings):
+def populate_postings_and_skip(docs, postings):
 	for doc_id, doc in sorted(docs.items(), key=lambda x:int(operator.itemgetter(0)(x))):
 		for term in set(doc):
 			postings[term]['doc_ids'].append(doc_id)
@@ -64,6 +64,9 @@ def populate_skip_postings(docs, postings):
 	for term, posting in postings.items():
 		posting_len = len(postings[term]['doc_ids'])
 		postings[term]['interval'] = math.floor((posting_len - 1) / math.floor(math.sqrt(posting_len)))
+
+def build_doc_freq(dictionary, postings):
+	return [len(postings[term]['doc_ids']) for term in dictionary]
 
 # takes in directory of corpus
 # returns dict of doc_id: string(doc)
@@ -76,6 +79,11 @@ def load_data(dir_doc):
 				docs[name] = f.read()
 
 	return docs
+
+def save_dictionary(dictionary, postings):
+	with io.open(dict_path, 'wb') as f:
+		pickle.dump(dictionary, f)
+		pickle.dump(doc_freq, f)
 
 # takes in dict of term: posting_dict. posting_dict is a dict {'interval': x, 'doc_ids': [doc_ids]}
 # saves list of object sizes in bytes in sorted order of terms as first object, saves each posting_dict as separate, subsequent objects.
@@ -135,13 +143,12 @@ if __name__ == '__main__':
 	docs = load_data(dir_doc)
 	docs = preprocess(docs)
 	dictionary = build_dict(docs)
-	postings = build_postings(dictionary)
-	populate_skip_postings(docs, postings)
+	postings = init_postings(dictionary)
+	populate_postings_and_skip(docs, postings)
+	doc_freq = build_doc_freq(dictionary, postings)
 	# skip_pointers = build_skip_pointers(postings)
 
-	with io.open(dict_path, 'wb') as f:
-		pickle.dump(dictionary, f)
-
+	save_dictionary(dictionary, doc_freq)
 	save_postings(postings)
 
 	for i in range(3):
