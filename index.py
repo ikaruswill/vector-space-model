@@ -9,18 +9,22 @@ import pickle
 import math
 import operator
 
-# Dictionary is a sorted list of terms
+# Dictionary is a dictionary of {term: {index: i, doc_freq: n}}
 # Postings is a dictionary of {term:{interval: x, doc_ids: list(doc_ids)}}
 
 # takes in a dict of doc_id: doc items
-# returns a sorted list of non-duplicated terms in collection
+# returns a dict of {term: term_dict}; term_dict is a dict of {index:i}
 def build_dict(docs):
 	dictionary = set()
 	for doc_id, doc in docs.items():
 		dictionary.update(doc)
 
-	dictionary = list(dictionary)
-	dictionary.sort()
+	dictionary_ordered = list(dictionary)
+	dictionary_ordered.sort()
+
+	dictionary = {}
+	for i, term in enumerate(dictionary_ordered):
+		dictionary[term] = {'index': i}
 
 	return dictionary
 
@@ -63,8 +67,9 @@ def populate_postings_and_skip(docs, postings):
 		posting_len = len(postings[term]['doc_ids'])
 		postings[term]['interval'] = math.floor((posting_len - 1) / math.floor(math.sqrt(posting_len)))
 
-def build_doc_freq(dictionary, postings):
-	return [len(postings[term]['doc_ids']) for term in dictionary]
+def populate_doc_freq(dictionary, postings):
+	for term, term_dict in dictionary.items():
+		term_dict['doc_freq'] = len(postings[term]['doc_ids'])
 
 # takes in directory of corpus
 # returns dict of doc_id: string(doc)
@@ -143,7 +148,7 @@ if __name__ == '__main__':
 	dictionary = build_dict(docs)
 	postings = init_postings(dictionary)
 	populate_postings_and_skip(docs, postings)
-	doc_freq = build_doc_freq(dictionary, postings)
+	populate_doc_freq(dictionary, postings)
 	# skip_pointers = build_skip_pointers(postings)
 
 	save_dictionary(dictionary, doc_freq)
