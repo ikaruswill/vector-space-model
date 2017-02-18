@@ -85,7 +85,7 @@ def load_data(dir_doc):
 
 	return docs
 
-def save_dictionary(dictionary, postings):
+def save_dictionary(dictionary):
 	with io.open(dict_path, 'wb') as f:
 		pickle.dump(dictionary, f)
 		
