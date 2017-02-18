@@ -26,7 +26,7 @@ def build_dict(docs):
 
 # takes in a list of terms
 # returns a dict of term: posting dict objects
-def build_postings(dictionary):
+def init_postings(dictionary):
 	postings = {}
 	for term in dictionary:
 		postings[term] = {}
@@ -54,7 +54,7 @@ def build_postings(dictionary):
 # takes in dict of doc_id:set(processed_doc)
 # takes in initialized postings dict of term: posting_dict
 # returns dict of postings term: posting_dict; posting_dict is a dict {'interval': x, 'doc_ids': [doc_ids]}
-def populate_skip_postings(docs, postings):
+def populate_postings_and_skip(docs, postings):
 	for doc_id, doc in sorted(docs.items(), key=lambda x:int(operator.itemgetter(0)(x))):
 		for term in set(doc):
 			postings[term]['doc_ids'].append(doc_id)
@@ -133,8 +133,8 @@ if __name__ == '__main__':
 	docs = load_data(dir_doc)
 	docs = preprocess(docs)
 	dictionary = build_dict(docs)
-	postings = build_postings(dictionary)
-	populate_skip_postings(docs, postings)
+	postings = init_postings(dictionary)
+	populate_postings_and_skip(docs, postings)
 	# skip_pointers = build_skip_pointers(postings)
 
 	with io.open(dict_path, 'wb') as f:
