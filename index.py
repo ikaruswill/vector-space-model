@@ -63,6 +63,9 @@ def populate_postings_and_skip(docs, postings):
 		posting_len = len(postings[term]['doc_ids'])
 		postings[term]['interval'] = math.floor((posting_len - 1) / math.floor(math.sqrt(posting_len)))
 
+def build_doc_freq(dictionary, postings):
+	return [len(postings[term]['doc_ids']) for term in dictionary]
+
 # takes in directory of corpus
 # returns dict of doc_id: string(doc)
 def load_data(dir_doc):
@@ -74,6 +77,11 @@ def load_data(dir_doc):
 				docs[name] = f.read()
 
 	return docs
+
+def save_dictionary(dictionary, postings):
+	with io.open(dict_path, 'wb') as f:
+		pickle.dump(dictionary, f)
+		pickle.dump(doc_freq, f)
 
 # takes in dict of term: posting_dict. posting_dict is a dict {'interval': x, 'doc_ids': [doc_ids]}
 # saves list of object sizes in bytes in sorted order of terms as first object, saves each posting_dict as separate, subsequent objects.
@@ -135,9 +143,8 @@ if __name__ == '__main__':
 	dictionary = build_dict(docs)
 	postings = init_postings(dictionary)
 	populate_postings_and_skip(docs, postings)
+	doc_freq = build_doc_freq(dictionary, postings)
 	# skip_pointers = build_skip_pointers(postings)
 
-	with io.open(dict_path, 'wb') as f:
-		pickle.dump(dictionary, f)
-
+	save_dictionary(dictionary, doc_freq)
 	save_postings(postings)
