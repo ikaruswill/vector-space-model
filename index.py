@@ -151,14 +151,18 @@ if __name__ == '__main__':
 	save_dictionary(dictionary, doc_freq)
 	save_postings(postings)
 
+	print('++ 3 Random items in docs ++')
 	for i in range(3):
 		print(random.choice(list(docs.items())))
 
+	print('++ 3 Random items in dictionary ++')
 	for i in range(3):
 		print(random.choice(list(dictionary)))
 
+	print('++ 3 Random items in postings with len > 4, with doc_freq ++')
 	for i in range(3):
 		term, posting = random.choice(list(postings.items()))
 		while len(posting['doc_ids']) < 4:
 			term, posting = random.choice(list(postings.items()))
 		print(term, ' ', posting)
+		print('doc_freq:', doc_freq[dictionary.index(term)], 'actual:', len(posting['doc_ids']))
