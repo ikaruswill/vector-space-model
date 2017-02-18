@@ -42,7 +42,7 @@ if __name__ == '__main__':
 	postings_sizes = pickle.load(postings_file)
 	starting_byte_offset = postings_file.tell()
 
-	index_of_term = dictionary.index("bill")
+	index_of_term = dictionary['bill']['index']
 	posting_offset = postings_sizes[index_of_term]
 
 	print(pickle.load(postings_file))
@@ -62,7 +62,7 @@ if __name__ == '__main__':
 		print('***QUERY RESULT***')
 		# encode to non-unicode
 		stem = stemmer.stem(query.encode('ascii'))
-		index_of_term = dictionary.index(stem)
+		index_of_term = dictionary[stem]['index']
 		print(index_of_term)
 
 		# skip if not found
