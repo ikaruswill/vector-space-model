@@ -44,12 +44,14 @@ def shuntingYard(tokens_and_operators):
 		elif token_or_operator.upper() in available_operators:
 			cur_precendence = getPrecedence(token_or_operator.upper())
 			prev_precendence = getPrevPrecedence(operator_stack)
-
-			if cur_precendence < prev_precendence:
+			while cur_precendence < prev_precendence:
 				output.append(operator_stack.pop(0))
+				cur_precendence = getPrecedence(token_or_operator.upper())
+				prev_precendence = getPrevPrecedence(operator_stack)
 			operator_stack.insert(0, token_or_operator)
 		else:
 			output.append(getDictionaryEntry(token_or_operator))
+			# output.append(token_or_operator)
 	output.extend(operator_stack)
 
 	pprint(output)
@@ -57,34 +59,56 @@ def shuntingYard(tokens_and_operators):
 
 def getDictionaryEntry(term):
 	stemmer = PorterStemmer()
-
 	stem = stemmer.stem(term)
-	return {} if dictionary.get(stem) is None else dictionary[stem]
+	return {'doc_freq': 0} if dictionary.get(stem) is None else dictionary[stem]
 
-def getDocIds(term):
-	stemmer = PorterStemmer()
-
-	stem = stemmer.stem(term)
-	index_of_term = -1 if dictionary.get(stem) is None else dictionary[stem]['index']
-
-	# skip if not found
-	if index_of_term < 0:
-		print(stem, 'not in dictionary')
-		return []
-
+def getPosting(index_of_term):
 	# calculate byte offset
 	posting_offset = 0 if index_of_term - 1 < 0 else postings_sizes[index_of_term - 1]
 	byte_offset = starting_byte_offset + posting_offset
 	postings_file.seek(byte_offset, 0)
 	posting = pickle.load(postings_file)
-	return posting.get('doc_ids')
+	return posting
 
+def getPostingFromDictEntry(dict_entry):
+	return getPosting(dict_entry['index']) if dict_entry.get('posting') is None \
+		else dict_entry['posting']
+
+def getCommonPosting(pst1, pst2):
+	idx1 = 0
+	idx2 = 0
+	new_doc_ids = []
+	while True:
+		pst1_doc_id = pst1['doc_ids'][idx1]
+		pst2_doc_id = pst2['doc_ids'][idx2]
+		if pst1_doc_id == pst2_doc_id:
+			new_doc_ids.append(pst1_doc_id)
+		# elif pst1_doc_id > pst2_doc_id:
+		#
+		# else:
+
+
+
+def andOperation(dict_entries, min_index):
+	min_dict_entry = dict_entries[min_index]
+	if min_dict_entry.get('doc_freq') == 0:
+		return { 'doc_freq': 0, 'posting': [] }
+	min_posting = getPostingFromDictEntry(min_dict_entry)
+	for idx, entry in enumerate(dict_entries):
+		if idx == min_index:
+			continue
+		cur_posting = getPostingFromDictEntry(entry)
+		min_posting = getCommonPosting(min_posting, cur_posting)
+	return min_posting
 
 def handleQuery(query):
 	print('query: ', query)
 	processed_query = shuntingYard(query.split(' '))
 
+	skip_to_idx = 0;
 	for idx, item in enumerate(processed_query):
+		if idx < skip_to_idx:
+			continue;
 		if item == 'NOT':
 			continue
 		elif item == 'AND':
@@ -93,7 +117,17 @@ def handleQuery(query):
 			while idx + offset < len(processed_query) and processed_query[idx + offset] == 'AND':
 				consecutive_and += 1
 				offset += 1
-			print('consecutive_and', consecutive_and)
+
+			min_freq = -1
+			min_index = -1
+			start_index = idx - consecutive_and - 1
+			for i in range(start_index, idx):
+				# print(i, processed_query[i])
+				if min_freq == -1 or processed_query[i]['doc_freq'] < min_freq:
+					min_freq = processed_query[i]['doc_freq']
+					min_index = i
+			andOperation(processed_query[start_index : idx], min_index - start_index)
+			skip_to_idx = idx + consecutive_and
 		elif item == 'OR':
 			continue
 
