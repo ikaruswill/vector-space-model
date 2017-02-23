@@ -3,6 +3,7 @@ import getopt
 import sys
 import pickle
 from nltk.stem.porter import PorterStemmer
+import math
 from pprint import pprint
 
 operator_precedence_table = {
@@ -54,7 +55,7 @@ def shuntingYard(tokens_and_operators):
 			# output.append(token_or_operator)
 	output.extend(operator_stack)
 
-	pprint(output)
+	print('SHUNTING YARD: ', output)
 	return output
 
 def getDictionaryEntry(term):
@@ -71,23 +72,62 @@ def getPosting(index_of_term):
 	return posting
 
 def getPostingFromDictEntry(dict_entry):
-	return getPosting(dict_entry['index']) if dict_entry.get('posting') is None \
-		else dict_entry['posting']
+	if dict_entry.get('posting') is not None:
+		return dict_entry['posting']
+	elif dict_entry.get('index') is not None:
+		return getPosting(dict_entry['index'])
+	else:
+		return { 'doc_ids': [] }
+
+def findMatch(idx, pst, target_doc_id):
+	has_skip = idx % (pst['interval'] + 1) == 0
+	new_idx = min( idx + pst['interval'], len(pst['doc_ids']) - 1 ) if has_skip else idx + 1
+	if target_doc_id > pst['doc_ids'][new_idx]:
+		return new_idx, None
+
+	#loop between idx and new_idx (exclusive) to find if there's a match
+	for i in range(idx + 1, new_idx):
+		if target_doc_id == pst['doc_ids'][i]:
+			return i, target_doc_id
+
+		if target_doc_id < pst['doc_ids'][i]:
+			return i, None
+
+	return new_idx, None
 
 def getCommonPosting(pst1, pst2):
 	idx1 = 0
 	idx2 = 0
 	new_doc_ids = []
-	while True:
+	# print('pst1/2', pst1, pst2)
+	while idx1 < len(pst1['doc_ids']) and idx2 < len(pst2['doc_ids']):
 		pst1_doc_id = pst1['doc_ids'][idx1]
 		pst2_doc_id = pst2['doc_ids'][idx2]
+
 		if pst1_doc_id == pst2_doc_id:
 			new_doc_ids.append(pst1_doc_id)
-		# elif pst1_doc_id > pst2_doc_id:
-		#
-		# else:
+			idx1 += 1
+			idx2 += 1
+		elif idx1 == len(pst1['doc_ids']) - 1 or idx2 == len(pst2['doc_ids']) - 1:
+			break
+		elif pst1_doc_id > pst2_doc_id:
+			idx2, doc_id = findMatch(idx2, pst2, pst1_doc_id)
+			if doc_id is not None:
+				new_doc_ids.append(doc_id)
+			idx1 += 1
+		else:
+			idx1, doc_id = findMatch(idx1, pst1, pst2_doc_id)
+			if doc_id is not None:
+				new_doc_ids.append(doc_id)
+			idx2 += 1
 
-
+	# return new posting
+	posting_len = len(new_doc_ids)
+	interval = 0 if posting_len == 0 else math.floor((posting_len - 1) / math.floor(math.sqrt(posting_len)))
+	return {
+		'doc_ids': new_doc_ids,
+		'interval': interval
+	}
 
 def andOperation(dict_entries, min_index):
 	min_dict_entry = dict_entries[min_index]
@@ -99,6 +139,7 @@ def andOperation(dict_entries, min_index):
 			continue
 		cur_posting = getPostingFromDictEntry(entry)
 		min_posting = getCommonPosting(min_posting, cur_posting)
+		print('MIN POSTING', min_posting)
 	return min_posting
 
 def handleQuery(query):
@@ -106,10 +147,14 @@ def handleQuery(query):
 	processed_query = shuntingYard(query.split(' '))
 
 	skip_to_idx = 0;
-	for idx, item in enumerate(processed_query):
-		if idx < skip_to_idx:
-			continue;
+	# for idx, item in enumerate(processed_query):
+	idx = 0
+	while idx < len(processed_query):
+		item = processed_query[idx]
+		# if idx < skip_to_idx:
+		# 	continue;
 		if item == 'NOT':
+			idx += 1
 			continue
 		elif item == 'AND':
 			consecutive_and = 1
@@ -122,14 +167,25 @@ def handleQuery(query):
 			min_index = -1
 			start_index = idx - consecutive_and - 1
 			for i in range(start_index, idx):
-				# print(i, processed_query[i])
 				if min_freq == -1 or processed_query[i]['doc_freq'] < min_freq:
 					min_freq = processed_query[i]['doc_freq']
 					min_index = i
-			andOperation(processed_query[start_index : idx], min_index - start_index)
-			skip_to_idx = idx + consecutive_and
+			new_posting = andOperation(processed_query[start_index : idx], min_index - start_index)
+
+			# replace from start_index to idx + consecutive_and - 1 to entry with new_posting
+			new_dict_entry = {
+					'posting': new_posting,
+					'doc_freq': len(new_posting['doc_ids'])
+				}
+			processed_query = processed_query[ 0 : start_index ] +\
+			 	[new_dict_entry] + processed_query[idx + consecutive_and:]
+			print('new processed_query', processed_query)
+			idx = start_index
 		elif item == 'OR':
+			idx += 1
 			continue
+		else:
+			idx += 1
 
 
 
