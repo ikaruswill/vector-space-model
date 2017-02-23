@@ -12,10 +12,11 @@ operator_precedence_table = {
 	'OR' : 1,
 }
 
-dictionary = ''
-postings_file = ''
-postings_sizes = ''
-starting_byte_offset = ''
+dictionary = {}
+postings_file = None
+postings_sizes = []
+starting_byte_offset = 0
+all_doc_ids = []
 
 def usage():
 	print("usage: " + sys.argv[0] + " -d dictionary-file -p postings-file -q file-of-queries -o output-file-of-results")
@@ -72,11 +73,13 @@ def getPosting(index_of_term):
 	return posting
 
 def getPostingFromDictEntry(dict_entry):
+	print('get posting from dict', dict_entry)
 	if dict_entry.get('posting') is not None:
 		return dict_entry['posting']
 	elif dict_entry.get('index') is not None:
 		return getPosting(dict_entry['index'])
 	else:
+		print('else case')
 		return { 'doc_ids': [] }
 
 def findMatch(idx, pst, target_doc_id):
@@ -122,17 +125,18 @@ def getCommonPosting(pst1, pst2):
 			idx2 += 1
 
 	# return new posting
-	posting_len = len(new_doc_ids)
-	interval = 0 if posting_len == 0 else math.floor((posting_len - 1) / math.floor(math.sqrt(posting_len)))
 	return {
-		'doc_ids': new_doc_ids,
-		'interval': interval
-	}
+			'doc_ids': new_doc_ids,
+			'interval': getInterval(len(new_doc_ids))
+		}
+
+def getInterval(posting_len):
+	return 0 if posting_len == 0 else math.floor((posting_len - 1) / math.floor(math.sqrt(posting_len)))
 
 def andOperation(dict_entries, min_index):
 	min_dict_entry = dict_entries[min_index]
 	if min_dict_entry.get('doc_freq') == 0:
-		return { 'doc_freq': 0, 'posting': [] }
+		return { 'interval': 0, 'doc_ids': [] }
 	min_posting = getPostingFromDictEntry(min_dict_entry)
 	for idx, entry in enumerate(dict_entries):
 		if idx == min_index:
@@ -141,6 +145,17 @@ def andOperation(dict_entries, min_index):
 		min_posting = getCommonPosting(min_posting, cur_posting)
 		print('MIN POSTING', min_posting)
 	return min_posting
+
+def orOperation(dict_entries):
+	pst1 = getPostingFromDictEntry(dict_entries[0])
+	pst2 = getPostingFromDictEntry(dict_entries[1])
+
+	new_doc_ids = pst1['doc_ids'] + list(set(pst2['doc_ids']) - set(pst1['doc_ids']))
+	# return new posting
+	return {
+			'doc_ids': new_doc_ids,
+			'interval': getInterval(len(new_doc_ids))
+		}
 
 def handleQuery(query):
 	print('===============')
@@ -152,8 +167,6 @@ def handleQuery(query):
 	idx = 0
 	while idx < len(processed_query):
 		item = processed_query[idx]
-		# if idx < skip_to_idx:
-		# 	continue;
 		if item == 'NOT':
 			idx += 1
 			continue
@@ -172,7 +185,7 @@ def handleQuery(query):
 					min_freq = processed_query[i]['doc_freq']
 					min_index = i
 			new_posting = andOperation(processed_query[start_index : idx], min_index - start_index)
-
+			print('new posting', new_posting)
 			# replace from start_index to idx + consecutive_and - 1 to entry with new_posting
 			new_dict_entry = {
 					'posting': new_posting,
@@ -183,10 +196,21 @@ def handleQuery(query):
 			print('new processed_query', processed_query)
 			idx = start_index
 		elif item == 'OR':
-			idx += 1
+			# idx += 1
+			start_index = idx - 2
+			new_posting = orOperation(processed_query[start_index : idx])
+			new_dict_entry = {
+					'posting': new_posting,
+					'doc_freq': len(new_posting['doc_ids'])
+				}
+			processed_query = processed_query[ 0 : start_index ] +\
+			 	[new_dict_entry] + processed_query[idx + 1:]
+			print('new processed_query', processed_query)
+			idx = start_index
 			continue
 		else:
 			idx += 1
+	print('final', processed_query)
 
 
 
