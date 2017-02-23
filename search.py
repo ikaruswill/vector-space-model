@@ -81,7 +81,7 @@ def getPostingFromDictEntry(dict_entry):
 
 def findMatch(idx, pst, target_doc_id):
 	has_skip = idx % (pst['interval'] + 1) == 0
-	new_idx = min( idx + pst['interval'], len(pst['doc_ids']) - 1 ) if has_skip else idx + 1
+	new_idx = min( idx + pst['interval'] + 1, len(pst['doc_ids']) - 1 ) if has_skip else idx + 1
 	if target_doc_id > pst['doc_ids'][new_idx]:
 		return new_idx, None
 
@@ -143,6 +143,7 @@ def andOperation(dict_entries, min_index):
 	return min_posting
 
 def handleQuery(query):
+	print('===============')
 	print('query: ', query)
 	processed_query = shuntingYard(query.split(' '))
 
