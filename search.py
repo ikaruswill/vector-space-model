@@ -309,7 +309,8 @@ if __name__ == '__main__':
 	output_file = io.open(output_path, 'w')
 	with io.open(query_path, 'r') as f:
 		for line in f:
-			if line:
+			line = line.strip()
+			if line != '':
 				query = addSpaceForBrackets(line.strip())
 				result = handleQuery(query)
 				output = ' '.join(result)
