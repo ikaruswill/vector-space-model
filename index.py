@@ -28,6 +28,8 @@ def build_dict(docs):
 	for i, term in enumerate(dictionary_ordered):
 		dictionary[term] = {'index': i}
 
+	dictionary['*'] = {'index': i + 1}
+
 	return dictionary
 
 # takes in a list of terms
@@ -64,6 +66,7 @@ def populate_postings_and_skip(docs, postings):
 	for doc_id, doc in sorted(docs.items(), key=lambda x:int(operator.itemgetter(0)(x))):
 		for term in set(doc):
 			postings[term]['doc_ids'].append(doc_id)
+		postings['*']['doc_ids'].append(doc_id)
 
 	for term, posting in postings.items():
 		posting_len = len(postings[term]['doc_ids'])
@@ -98,7 +101,6 @@ def save_postings(postings):
 
 	# Generate posting objects
 	cumulative = 0
-	sizes.append(cumulative)
 	for term, posting in sorted(postings.items()):
 		pickled_posting = pickle.dumps(posting)
 		cumulative += len(pickled_posting)
