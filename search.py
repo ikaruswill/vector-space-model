@@ -255,7 +255,11 @@ def handleQuery(query):
 			continue
 		else:
 			idx += 1
+
+	if processed_query[0].get('posting') is None:
+		return getPostingFromDictEntry(processed_query[0], False)['doc_ids']
 	print('final', processed_query)
+	return processed_query[0]['posting']['doc_ids']
 
 def findAllDocIds():
 	all_doc_ids = []
@@ -299,10 +303,13 @@ if __name__ == '__main__':
 
 	print('***QUERY RESULT***')
 
+	output_file = io.open(output_path, 'w')
 	with io.open(query_path, 'r') as f:
 		query = f.readline()[:-1] #remove \n
 		while query:
-			handleQuery(query)
+			output = ' '.join(handleQuery(query))
+			print('output', output)
+			output_file.write(output + '\n')
 			query = f.readline()[:-1]
 
 	postings_file.close()
