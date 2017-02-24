@@ -4,7 +4,7 @@ import sys
 import pickle
 from nltk.stem.porter import PorterStemmer
 import math
-from datetime import datetime
+from copy import deepcopy
 
 operator_precedence_table = {
 	'NOT': 3,
@@ -178,6 +178,7 @@ def andOperation(dict_entries, min_freq_index):
 def orOperation(dict_entries):
 	pst1 = getPostingFromDictEntry(dict_entries[0], dict_entries[0].get('has_not'))
 	pst2 = getPostingFromDictEntry(dict_entries[1], dict_entries[1].get('has_not'))
+	print(pst1, pst2)
 
 	new_doc_ids = pst1['doc_ids'] + list(set(pst2['doc_ids']) - set(pst1['doc_ids']))
 	# return new posting
@@ -187,8 +188,9 @@ def orOperation(dict_entries):
 		}
 
 def notOperation(dict_entry):
-	dict_entry['has_not'] = True
-	return dict_entry
+	new_dict = deepcopy(dict_entry)
+	new_dict['has_not'] = True
+	return new_dict
 
 def handleQuery(query):
 	print('=====================================')
@@ -321,6 +323,7 @@ if __name__ == '__main__':
 			if line != '':
 				query = addSpaceForBrackets(line.strip())
 				result = handleQuery(query)
+				print('len', len(result))
 				output = ' '.join(result)
 				print('output', output)
 				output_file.write(output + '\n')
