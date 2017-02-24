@@ -308,12 +308,12 @@ if __name__ == '__main__':
 
 	output_file = io.open(output_path, 'w')
 	with io.open(query_path, 'r') as f:
-		query = f.readline()[:-1] #remove \n
-		query = addSpaceForBrackets(query)
-		while query:
-			output = ' '.join(handleQuery(query))
-			print('output', output)
-			output_file.write(output + '\n')
-			query = f.readline()[:-1]
+		for line in f:
+			if line:
+				query = addSpaceForBrackets(line.strip())
+				result = handleQuery(query)
+				output = ' '.join(result)
+				print('output', output)
+				output_file.write(output + '\n')
 
 	postings_file.close()
