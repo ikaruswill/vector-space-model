@@ -179,12 +179,11 @@ def orOperation(dict_entries):
 		}
 
 def notOperation(dict_entry):
-	pst = getPostingFromDictEntry(dict_entry)
-	pst['has_not'] = True
-	return pst
+	dict_entry['has_not'] = True
+	return dict_entry
 
 def handleQuery(query):
-	print('===============')
+	print('=====================================')
 	print('query: ', query)
 	processed_query = shuntingYard(query.split(' '))
 
@@ -195,10 +194,7 @@ def handleQuery(query):
 		item = processed_query[idx]
 		if item == 'NOT':
 			start_index = idx - 1
-			new_dict_entry = {
-					'posting': notOperation(processed_query[start_index]),
-					'doc_freq': processed_query[start_index]['doc_freq']
-				}
+			new_dict_entry = notOperation(processed_query[start_index])
 			processed_query = processed_query[ 0 : start_index ] +\
 			 	[new_dict_entry] + processed_query[idx + 1:]
 			idx = start_index
@@ -231,7 +227,7 @@ def handleQuery(query):
 				new_posting = andOperation(processed_query[start_index : idx], max_has_not_index - start_index)
 			else:
 				new_posting = andOperation(processed_query[start_index : idx], min_freq_index - start_index)
-			print('new posting', new_posting)
+
 			# replace from start_index to idx + consecutive_and - 1 to entry with new_posting
 			new_dict_entry = {
 					'posting': new_posting,
@@ -239,7 +235,7 @@ def handleQuery(query):
 				}
 			processed_query = processed_query[ 0 : start_index ] +\
 			 	[new_dict_entry] + processed_query[idx + consecutive_and:]
-			print('new processed_query', processed_query)
+			# print('new processed_query', processed_query)
 			idx = start_index
 		elif item == 'OR':
 			start_index = idx - 2
@@ -250,16 +246,32 @@ def handleQuery(query):
 				}
 			processed_query = processed_query[ 0 : start_index ] +\
 			 	[new_dict_entry] + processed_query[idx + 1:]
-			print('new processed_query', processed_query)
+			# print('new processed_query', processed_query)
 			idx = start_index
 			continue
 		else:
 			idx += 1
 
+	# print('final', processed_query)
+
 	if processed_query[0].get('posting') is None:
-		return getPostingFromDictEntry(processed_query[0])['doc_ids']
-	print('final', processed_query)
+		return getPostingFromDictEntry(processed_query[0], processed_query[0].get('has_not'))['doc_ids']
+
+	if processed_query[0].get('has_not') is True:
+		return getPostingFromDictEntry(processed_query[0], True)['doc_ids']
+
 	return processed_query[0]['posting']['doc_ids']
+
+def addSpaceForBrackets(query):
+	new_query = ''
+	for i, char in enumerate(query):
+		if char == '(' and i + 1 < len(query) and query[i + 1] != ' ':
+			new_query += '( '
+		elif char == ')' and i - 1 >= 0 and query[i - 1] != ' ':
+			new_query += ' )'
+		else:
+			new_query += char
+	return new_query
 
 if __name__ == '__main__':
 	dict_path = postings_path = query_path = output_path = None
@@ -297,6 +309,7 @@ if __name__ == '__main__':
 	output_file = io.open(output_path, 'w')
 	with io.open(query_path, 'r') as f:
 		query = f.readline()[:-1] #remove \n
+		query = addSpaceForBrackets(query)
 		while query:
 			output = ' '.join(handleQuery(query))
 			print('output', output)
