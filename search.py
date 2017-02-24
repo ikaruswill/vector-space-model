@@ -85,6 +85,8 @@ def getPostingFromDictEntry(dict_entry, has_not = False):
 		posting = dict_entry['posting']
 	elif dict_entry.get('index') is not None:
 		posting = getPosting(dict_entry['index'])
+	elif has_not:
+		return { 'doc_ids': all_doc_ids }
 	else:
 		return { 'doc_ids': [] }
 
@@ -95,15 +97,11 @@ def getPostingFromDictEntry(dict_entry, has_not = False):
 def findMatch(idx, pst, target_doc_id):
 	has_skip = idx % (pst['interval'] + 1) == 0
 	new_idx = min( idx + pst['interval'] + 1, len(pst['doc_ids']) - 1 ) if has_skip else idx + 1
-	print('target_doc_id', target_doc_id, 'new idx doc id', pst['doc_ids'][new_idx])
-	print('has skip', has_skip, 'new idx', new_idx)
 	if int(target_doc_id) > int(pst['doc_ids'][new_idx]):
-		print('still bigger --- skip to next index')
 		return new_idx, None
 
 	#loop between idx and new_idx (exclusive) to find if there's a match
 	for i in range(idx + 1, new_idx):
-		print('next doc of smaller one -->', i ,pst['doc_ids'][i])
 		if target_doc_id == pst['doc_ids'][i]:
 			return i + 1, target_doc_id
 
@@ -119,24 +117,19 @@ def getCommonPosting(pst1, pst2):
 	while idx1 < len(pst1['doc_ids']) and idx2 < len(pst2['doc_ids']):
 		pst1_doc_id = pst1['doc_ids'][idx1]
 		pst2_doc_id = pst2['doc_ids'][idx2]
-		print('pst 1 doc id', pst1_doc_id, 'pst 2 doc id', pst2_doc_id)
 
 		if pst1_doc_id == pst2_doc_id:
-			print('CASE 1')
 			new_doc_ids.append(pst1_doc_id)
 			idx1 += 1
 			idx2 += 1
 		elif idx1 == len(pst1['doc_ids']) - 1 or idx2 == len(pst2['doc_ids']) - 1:
-			print('CASE end')
 			break
 		elif int(pst1_doc_id) > int(pst2_doc_id):
-			print('CASE pst 1 doc id > pst 2 doc id')
 			idx2, doc_id = findMatch(idx2, pst2, pst1_doc_id)
 			if doc_id is not None:
 				new_doc_ids.append(doc_id)
 				idx1 += 1
 		else:
-			print('CASE pst 1 doc id < pst 2 doc id')
 			idx1, doc_id = findMatch(idx1, pst1, pst2_doc_id)
 			if doc_id is not None:
 				new_doc_ids.append(doc_id)
@@ -178,7 +171,6 @@ def andOperation(dict_entries, min_freq_index):
 def orOperation(dict_entries):
 	pst1 = getPostingFromDictEntry(dict_entries[0], dict_entries[0].get('has_not'))
 	pst2 = getPostingFromDictEntry(dict_entries[1], dict_entries[1].get('has_not'))
-	print(pst1, pst2)
 
 	new_doc_ids = pst1['doc_ids'] + list(set(pst2['doc_ids']) - set(pst1['doc_ids']))
 	# return new posting
@@ -323,7 +315,7 @@ if __name__ == '__main__':
 			if line != '':
 				query = addSpaceForBrackets(line.strip())
 				result = handleQuery(query)
-				print('len', len(result))
+				# print('len', len(result))
 				output = ' '.join(result)
 				print('output', output)
 				output_file.write(output + '\n')
