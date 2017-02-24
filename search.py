@@ -4,7 +4,7 @@ import sys
 import pickle
 from nltk.stem.porter import PorterStemmer
 import math
-from pprint import pprint
+from datetime import datetime
 
 operator_precedence_table = {
 	'NOT': 3,
@@ -72,15 +72,25 @@ def getPosting(index_of_term):
 	posting = pickle.load(postings_file)
 	return posting
 
-def getPostingFromDictEntry(dict_entry):
-	print('get posting from dict', dict_entry)
+def getNotPosting(pst):
+	new_doc_ids = [doc_id for doc_id in all_doc_ids if doc_id not in pst['doc_ids']]
+	return {
+			'doc_ids': new_doc_ids,
+			'interval': getInterval(len(new_doc_ids))
+		}
+
+def getPostingFromDictEntry(dict_entry, has_not):
+	posting = {}
 	if dict_entry.get('posting') is not None:
-		return dict_entry['posting']
+		posting = dict_entry['posting']
 	elif dict_entry.get('index') is not None:
-		return getPosting(dict_entry['index'])
+		posting = getPosting(dict_entry['index'])
 	else:
-		print('else case')
 		return { 'doc_ids': [] }
+
+	if has_not == True:
+		return getNotPosting(posting)
+	return posting
 
 def findMatch(idx, pst, target_doc_id):
 	has_skip = idx % (pst['interval'] + 1) == 0
@@ -133,22 +143,33 @@ def getCommonPosting(pst1, pst2):
 def getInterval(posting_len):
 	return 0 if posting_len == 0 else math.floor((posting_len - 1) / math.floor(math.sqrt(posting_len)))
 
-def andOperation(dict_entries, min_index):
-	min_dict_entry = dict_entries[min_index]
+def removePostingDocIds(pst1, pst2):
+	new_doc_ids = [doc_id for doc_id in pst1['doc_ids'] if doc_id not in pst2['doc_ids']]
+	return {
+			'doc_ids': new_doc_ids,
+			'interval': getInterval(len(new_doc_ids))
+		}
+
+def andOperation(dict_entries, min_freq_index):
+	min_dict_entry = dict_entries[min_freq_index]
 	if min_dict_entry.get('doc_freq') == 0:
 		return { 'interval': 0, 'doc_ids': [] }
-	min_posting = getPostingFromDictEntry(min_dict_entry)
+	min_posting = getPostingFromDictEntry(min_dict_entry, min_dict_entry.get('has_not'))
 	for idx, entry in enumerate(dict_entries):
-		if idx == min_index:
+		if idx == min_freq_index:
 			continue
-		cur_posting = getPostingFromDictEntry(entry)
-		min_posting = getCommonPosting(min_posting, cur_posting)
+		cur_posting = getPostingFromDictEntry(entry, False)
+
+		if cur_posting.get('has_not'):
+			min_posting = removePostingDocIds(min_posting, cur_posting)
+		else:
+			min_posting = getCommonPosting(min_posting, cur_posting)
 		print('MIN POSTING', min_posting)
 	return min_posting
 
 def orOperation(dict_entries):
-	pst1 = getPostingFromDictEntry(dict_entries[0])
-	pst2 = getPostingFromDictEntry(dict_entries[1])
+	pst1 = getPostingFromDictEntry(dict_entries[0], dict_entries[0].get('has_not'))
+	pst2 = getPostingFromDictEntry(dict_entries[1], dict_entries[1].get('has_not'))
 
 	new_doc_ids = pst1['doc_ids'] + list(set(pst2['doc_ids']) - set(pst1['doc_ids']))
 	# return new posting
@@ -156,6 +177,11 @@ def orOperation(dict_entries):
 			'doc_ids': new_doc_ids,
 			'interval': getInterval(len(new_doc_ids))
 		}
+
+def notOperation(dict_entry):
+	pst = getPostingFromDictEntry(dict_entry, False)
+	pst['has_not'] = True
+	return pst
 
 def handleQuery(query):
 	print('===============')
@@ -168,7 +194,14 @@ def handleQuery(query):
 	while idx < len(processed_query):
 		item = processed_query[idx]
 		if item == 'NOT':
-			idx += 1
+			start_index = idx - 1
+			new_dict_entry = {
+					'posting': notOperation(processed_query[start_index]),
+					'doc_freq': processed_query[start_index]['doc_freq']
+				}
+			processed_query = processed_query[ 0 : start_index ] +\
+			 	[new_dict_entry] + processed_query[idx + 1:]
+			idx = start_index
 			continue
 		elif item == 'AND':
 			consecutive_and = 1
@@ -178,13 +211,26 @@ def handleQuery(query):
 				offset += 1
 
 			min_freq = -1
-			min_index = -1
+			min_freq_index = -1
 			start_index = idx - consecutive_and - 1
+			max_has_not_freq = -1
+			max_has_not_index = -1
+
 			for i in range(start_index, idx):
+				if processed_query[i].get('has_not') == True:
+					if max_has_not_freq == -1 or processed_query[i]['doc_freq'] > max_has_not_freq:
+						max_has_not_freq = processed_query[i]['doc_freq']
+						max_has_not_index = i
+					continue
 				if min_freq == -1 or processed_query[i]['doc_freq'] < min_freq:
 					min_freq = processed_query[i]['doc_freq']
-					min_index = i
-			new_posting = andOperation(processed_query[start_index : idx], min_index - start_index)
+					min_freq_index = i
+
+			new_posting = {}
+			if min_freq_index == -1:
+				new_posting = andOperation(processed_query[start_index : idx], max_has_not_index - start_index)
+			else:
+				new_posting = andOperation(processed_query[start_index : idx], min_freq_index - start_index)
 			print('new posting', new_posting)
 			# replace from start_index to idx + consecutive_and - 1 to entry with new_posting
 			new_dict_entry = {
@@ -196,7 +242,6 @@ def handleQuery(query):
 			print('new processed_query', processed_query)
 			idx = start_index
 		elif item == 'OR':
-			# idx += 1
 			start_index = idx - 2
 			new_posting = orOperation(processed_query[start_index : idx])
 			new_dict_entry = {
@@ -212,7 +257,14 @@ def handleQuery(query):
 			idx += 1
 	print('final', processed_query)
 
-
+def findAllDocIds():
+	all_doc_ids = []
+	while True:
+		try:
+			posting = pickle.load(postings_file)
+			all_doc_ids = all_doc_ids = all_doc_ids + list(set(posting['doc_ids']) - set(all_doc_ids))
+		except:
+			break
 
 if __name__ == '__main__':
 	dict_path = postings_path = query_path = output_path = None
@@ -243,6 +295,7 @@ if __name__ == '__main__':
 	postings_file = io.open(postings_path, 'rb')
 	postings_sizes = pickle.load(postings_file)
 	starting_byte_offset = postings_file.tell()
+	findAllDocIds()
 
 	print('***QUERY RESULT***')
 
