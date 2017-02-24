@@ -36,8 +36,8 @@ def shuntingYard(tokens_and_operators):
 	output = []
 	for token_or_operator in tokens_and_operators:
 		if token_or_operator == ')':
-			while True:
-				if len(operator_stack) > 0 and operator_stack[0] == '(':
+			while len(operator_stack) > 0:
+				if operator_stack[0] == '(':
 					operator_stack.pop(0)
 					break
 				output.append(operator_stack.pop(0))
@@ -313,11 +313,16 @@ if __name__ == '__main__':
 		for line in f:
 			line = line.strip()
 			if line != '':
-				query = addSpaceForBrackets(line.strip())
-				result = handleQuery(query)
-				# print('len', len(result))
-				output = ' '.join(result)
-				print('output', output)
-				output_file.write(output + '\n')
+				try:
+					query = addSpaceForBrackets(line.strip())
+					result = handleQuery(query)
+					# print('len', len(result))
+					output = ' '.join(result)
+					print('output', output)
+					output_file.write(output + '\n')
+				except Exception as e:
+					output_file.write('\n')
+					print('****** WARN EXCEPTION ******', e)
+					continue
 
 	postings_file.close()
