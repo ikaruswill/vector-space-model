@@ -12,7 +12,7 @@ import operator
 import random
 
 # Dictionary is a dictionary of {term: {index: i, doc_freq: n}}
-# Postings is a dictionary of {term:{interval: x, doc_ids: list(doc_ids)}}
+# Postings is a dictionary of {term: {interval: x, doc_ids: list(doc_ids)}}
 
 # takes in a dict of doc_id: doc items
 # returns a dict of {term: term_dict}; term_dict is a dict of {index:i}
@@ -173,3 +173,9 @@ if __name__ == '__main__':
 			term, posting = random.choice(list(postings.items()))
 		print(term, ' ', posting)
 		print('doc_freq:', dictionary[term]['doc_freq'], 'actual:', len(posting['doc_ids']))
+
+	print('++ Wildcard dict ++')
+	print(dictionary['*'])
+	print('++ Wildcard postings ++')
+	print(postings['*'])
+	print('doc_freq:', dictionary['*']['doc_freq'], 'actual:', len(postings['*']['doc_ids']))
