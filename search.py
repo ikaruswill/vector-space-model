@@ -79,7 +79,7 @@ def getNotPosting(pst):
 			'interval': getInterval(len(new_doc_ids))
 		}
 
-def getPostingFromDictEntry(dict_entry, has_not):
+def getPostingFromDictEntry(dict_entry, has_not = False):
 	posting = {}
 	if dict_entry.get('posting') is not None:
 		posting = dict_entry['posting']
@@ -158,7 +158,7 @@ def andOperation(dict_entries, min_freq_index):
 	for idx, entry in enumerate(dict_entries):
 		if idx == min_freq_index:
 			continue
-		cur_posting = getPostingFromDictEntry(entry, False)
+		cur_posting = getPostingFromDictEntry(entry)
 
 		if cur_posting.get('has_not'):
 			min_posting = removePostingDocIds(min_posting, cur_posting)
@@ -179,7 +179,7 @@ def orOperation(dict_entries):
 		}
 
 def notOperation(dict_entry):
-	pst = getPostingFromDictEntry(dict_entry, False)
+	pst = getPostingFromDictEntry(dict_entry)
 	pst['has_not'] = True
 	return pst
 
@@ -257,18 +257,9 @@ def handleQuery(query):
 			idx += 1
 
 	if processed_query[0].get('posting') is None:
-		return getPostingFromDictEntry(processed_query[0], False)['doc_ids']
+		return getPostingFromDictEntry(processed_query[0])['doc_ids']
 	print('final', processed_query)
 	return processed_query[0]['posting']['doc_ids']
-
-def findAllDocIds():
-	all_doc_ids = []
-	while True:
-		try:
-			posting = pickle.load(postings_file)
-			all_doc_ids = all_doc_ids = all_doc_ids + list(set(posting['doc_ids']) - set(all_doc_ids))
-		except:
-			break
 
 if __name__ == '__main__':
 	dict_path = postings_path = query_path = output_path = None
@@ -299,7 +290,7 @@ if __name__ == '__main__':
 	postings_file = io.open(postings_path, 'rb')
 	postings_sizes = pickle.load(postings_file)
 	starting_byte_offset = postings_file.tell()
-	findAllDocIds()
+	all_doc_ids = getPostingFromDictEntry(getDictionaryEntry('*'))['doc_ids']
 
 	print('***QUERY RESULT***')
 
