@@ -161,11 +161,11 @@ def andOperation(dict_entries, min_freq_index):
 			continue
 		cur_posting = getPostingFromDictEntry(entry)
 
-		if cur_posting.get('has_not'):
+		if entry.get('has_not'):
 			min_posting = removePostingDocIds(min_posting, cur_posting)
 		else:
 			min_posting = getCommonPosting(min_posting, cur_posting)
-		print('MIN POSTING', min_posting)
+		# print('MIN POSTING', min_posting)
 	return min_posting
 
 def orOperation(dict_entries):
@@ -200,6 +200,7 @@ def handleQuery(query):
 			processed_query = processed_query[ 0 : start_index ] +\
 			 	[new_dict_entry] + processed_query[idx + 1:]
 			idx = start_index
+			print('new processed_query', processed_query)
 			continue
 		elif item == 'AND':
 			consecutive_and = 1
@@ -237,7 +238,7 @@ def handleQuery(query):
 				}
 			processed_query = processed_query[ 0 : start_index ] +\
 			 	[new_dict_entry] + processed_query[idx + consecutive_and:]
-			# print('new processed_query', processed_query)
+			print('new processed_query', processed_query)
 			idx = start_index
 		elif item == 'OR':
 			start_index = idx - 2
@@ -248,7 +249,7 @@ def handleQuery(query):
 				}
 			processed_query = processed_query[ 0 : start_index ] +\
 			 	[new_dict_entry] + processed_query[idx + 1:]
-			# print('new processed_query', processed_query)
+			print('new processed_query', processed_query)
 			idx = start_index
 			continue
 		else:
@@ -318,7 +319,8 @@ if __name__ == '__main__':
 					result = handleQuery(query)
 					# print('len', len(result))
 					output = ' '.join(result)
-					print('output', output)
+					# print('output', output)
+					print(len(result));
 					output_file.write(output + '\n')
 				except Exception as e:
 					output_file.write('\n')
