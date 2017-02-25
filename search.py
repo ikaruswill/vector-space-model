@@ -61,7 +61,7 @@ def shuntingYard(tokens_and_operators):
 
 def getDictionaryEntry(term):
 	stemmer = PorterStemmer()
-	stem = stemmer.stem(term)
+	stem = stemmer.stem(term.lower())
 	return {'doc_freq': 0} if dictionary.get(stem) is None else dictionary[stem]
 
 def getPosting(index_of_term):
