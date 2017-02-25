@@ -1,0 +1,31 @@
+this_cannot_possibly_be_in_dictionary: 0
+NOT this_cannot_possibly_be_in_dictionary: 7769
+Reagan: 153
+NOT Reagan: 7616
+Reagan OR administration: 259
+Reagan AND administration: 98
+Reagan AND NOT administration: 55
+NOT Reagan AND administration: 106
+(NOT Reagan) AND administration: 106
+NOT (Reagan AND administration): 7671
+Reagan AND administration OR USDA: 263
+(Reagan AND administration) OR USDA: 263
+Reagan AND (administration OR USDA): 99
+Reagan AND (administration OR USDA))): 0
+(Reagan AND administration AND USDA) AND (Reagan AND administration AND USDA): 16
+(Reagan AND administration AND USDA) AND NOT (Reagan AND administration AND USDA): 0
+(Reagan AND administration): 98
+(Reagan AND administration) AND (Reagan AND administration AND NOT USDA): 82
+(Reagan AND administration) AND NOT (Reagan AND administration AND NOT USDA): 16
+administration: 204
+administrator: 204
+administer: 7
+administers: 7
+administered: 7
+center: 64
+centre: 40
+central: 381
+do: 361
+does: 253
+did: 421
+done: 71 

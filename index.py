@@ -21,14 +21,12 @@ def build_dict(docs):
 	for doc_id, doc in docs.items():
 		dictionary.update(doc)
 
-	dictionary_ordered = list(dictionary)
+	dictionary_ordered = list(dictionary) + ['*']
 	dictionary_ordered.sort()
 
 	dictionary = {}
 	for i, term in enumerate(dictionary_ordered):
 		dictionary[term] = {'index': i}
-
-	dictionary['*'] = {'index': i + 1}
 
 	return dictionary
 
@@ -91,7 +89,7 @@ def load_data(dir_doc):
 def save_dictionary(dictionary):
 	with io.open(dict_path, 'wb') as f:
 		pickle.dump(dictionary, f)
-		
+
 
 # takes in dict of term: posting_dict. posting_dict is a dict {'interval': x, 'doc_ids': [doc_ids]}
 # saves list of object sizes in bytes in sorted order of terms as first object, saves each posting_dict as separate, subsequent objects.

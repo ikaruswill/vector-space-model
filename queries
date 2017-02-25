@@ -1,0 +1,41 @@
+this_cannot_possibly_be_in_dictionary
+NOT this_cannot_possibly_be_in_dictionary
+
+Reagan
+NOT Reagan
+
+Reagan OR administration
+Reagan AND administration
+Reagan AND NOT administration
+NOT Reagan AND administration
+
+(NOT Reagan) AND administration
+NOT (Reagan AND administration)
+
+Reagan AND administration OR USDA
+(Reagan AND administration) OR USDA
+Reagan AND (administration OR USDA)
+
+Reagan AND (administration OR USDA)
+
+(Reagan AND administration AND USDA) AND (Reagan AND administration AND USDA)
+(Reagan AND administration AND USDA) AND NOT (Reagan AND administration AND USDA)
+
+(Reagan AND administration)
+(Reagan AND administration) AND (Reagan AND administration AND NOT USDA)
+(Reagan AND administration) AND NOT (Reagan AND administration AND NOT USDA)
+
+administration
+administrator
+administer
+administers
+administered
+
+center
+centre
+central
+
+do
+does
+did
+done
