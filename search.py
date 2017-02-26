@@ -333,9 +333,9 @@ if __name__ == '__main__':
 				try:
 					query = addSpaceForBrackets(line.strip())
 					result = handleQuery(query)
-					# print('len', len(result))
+					print('len', len(result))
 					output = ' '.join(result)
-					print('OUTPUT', output)
+					# print('OUTPUT', output)
 					output_file.write(output + '\n')
 				except Exception as e:
 					output_file.write('\n')
