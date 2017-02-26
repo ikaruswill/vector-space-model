@@ -99,12 +99,16 @@ def getPostingFromDictEntry(dict_entry, has_not = False):
 
 def findMatch(idx, pst, target_doc_id):
 	has_skip = idx % (pst['interval'] + 1) == 0
+	# print(idx, has_skip)
 	new_idx = min( idx + pst['interval'] + 1, len(pst['doc_ids']) - 1 ) if has_skip else idx + 1
-	if int(target_doc_id) > int(pst['doc_ids'][new_idx]):
+
+	# print('new index', new_idx)
+	if new_idx >= len(pst['doc_ids']) or int(target_doc_id) > int(pst['doc_ids'][new_idx]):
 		return new_idx, None
 
 	#loop between idx and new_idx (exclusive) to find if there's a match
 	for i in range(idx + 1, new_idx):
+		# print('loop doc id', pst['doc_ids'][i])
 		if target_doc_id == pst['doc_ids'][i]:
 			return i + 1, target_doc_id
 
@@ -120,19 +124,24 @@ def getCommonPosting(pst1, pst2):
 	while idx1 < len(pst1['doc_ids']) and idx2 < len(pst2['doc_ids']):
 		pst1_doc_id = pst1['doc_ids'][idx1]
 		pst2_doc_id = pst2['doc_ids'][idx2]
+		# print('pst1_doc_id', pst1_doc_id)
+		# print('pst2_doc_id', pst2_doc_id)
 
 		if pst1_doc_id == pst2_doc_id:
+			# print('CASE EQUAL')
 			new_doc_ids.append(pst1_doc_id)
 			idx1 += 1
 			idx2 += 1
-		elif idx1 == len(pst1['doc_ids']) - 1 or idx2 == len(pst2['doc_ids']) - 1:
+		elif idx1 == len(pst1['doc_ids']) - 1 and idx2 == len(pst2['doc_ids']) - 1:
 			break
 		elif int(pst1_doc_id) > int(pst2_doc_id):
+			# print('CASE PST1 > PST2')
 			idx2, doc_id = findMatch(idx2, pst2, pst1_doc_id)
 			if doc_id is not None:
 				new_doc_ids.append(doc_id)
 				idx1 += 1
 		else:
+			# print('CASE PST1 < PST2')
 			idx1, doc_id = findMatch(idx1, pst1, pst2_doc_id)
 			if doc_id is not None:
 				new_doc_ids.append(doc_id)
@@ -163,12 +172,14 @@ def andOperation(dict_entries, min_freq_index):
 		if idx == min_freq_index:
 			continue
 		cur_posting = getPostingFromDictEntry(entry)
+		# print('CUR POSTING', cur_posting, '\n')
 
-		if cur_posting.get('has_not'):
+		if entry.get('has_not'):
+			# print('cur posting has not')
 			min_posting = removePostingDocIds(min_posting, cur_posting)
 		else:
 			min_posting = getCommonPosting(min_posting, cur_posting)
-		print('MIN POSTING', min_posting)
+		# print('MIN POSTING', min_posting, '\n')
 	return min_posting
 
 def orOperation(dict_entries):
@@ -176,6 +187,8 @@ def orOperation(dict_entries):
 	pst2 = getPostingFromDictEntry(dict_entries[1], dict_entries[1].get('has_not'))
 
 	new_doc_ids = pst1['doc_ids'] + list(set(pst2['doc_ids']) - set(pst1['doc_ids']))
+	new_doc_ids.sort(key=int)
+
 	# return new posting
 	return {
 			'doc_ids': new_doc_ids,
@@ -203,6 +216,7 @@ def handleQuery(query):
 			processed_query = processed_query[ 0 : start_index ] +\
 			 	[new_dict_entry] + processed_query[idx + 1:]
 			idx = start_index
+			# print('new processed_query', processed_query, '\n')
 			continue
 		elif item == 'AND':
 			consecutive_and = 1
@@ -240,7 +254,7 @@ def handleQuery(query):
 				}
 			processed_query = processed_query[ 0 : start_index ] +\
 			 	[new_dict_entry] + processed_query[idx + consecutive_and:]
-			# print('new processed_query', processed_query)
+			# print('new processed_query', processed_query, '\n')
 			idx = start_index
 		elif item == 'OR':
 			start_index = idx - 2
@@ -251,7 +265,7 @@ def handleQuery(query):
 				}
 			processed_query = processed_query[ 0 : start_index ] +\
 			 	[new_dict_entry] + processed_query[idx + 1:]
-			# print('new processed_query', processed_query)
+			# print('new processed_query', processed_query, '\n')
 			idx = start_index
 			continue
 		else:
@@ -321,7 +335,7 @@ if __name__ == '__main__':
 					result = handleQuery(query)
 					# print('len', len(result))
 					output = ' '.join(result)
-					print('output', output)
+					print('OUTPUT', output)
 					output_file.write(output + '\n')
 				except Exception as e:
 					output_file.write('\n')
