@@ -115,7 +115,9 @@ def preprocess(docs):
 	punctuations = set(string.punctuation)
 	processed_docs = {}
 	for doc_id, doc in docs.items():
-		processed_docs[doc_id] = set([stemmer.stem(token) for token in word_tokenize(doc.lower())])
+		# try to remove terms start and end with number
+		processed_docs[doc_id] = set([stemmer.stem(token) for token in word_tokenize(doc.lower()) if not token[0].isdigit() or not token[-1].isdigit()])
+		# processed_docs[doc_id] = set([stemmer.stem(token) for token in word_tokenize(doc.lower())])
 		processed_docs[doc_id].difference_update(punctuations)
 
 	return processed_docs
