@@ -116,8 +116,8 @@ def preprocess(docs):
 	processed_docs = {}
 	for doc_id, doc in docs.items():
 		# try to remove terms start and end with number
-		processed_docs[doc_id] = set([stemmer.stem(token) for token in word_tokenize(doc.lower()) if not token[0].isdigit() or not token[-1].isdigit()])
-		# processed_docs[doc_id] = set([stemmer.stem(token) for token in word_tokenize(doc.lower())])
+		# processed_docs[doc_id] = set([stemmer.stem(token) for token in word_tokenize(doc.lower()) if not token[0].isdigit() or not token[-1].isdigit()])
+		processed_docs[doc_id] = set([stemmer.stem(token) for token in word_tokenize(doc.lower())])
 		processed_docs[doc_id].difference_update(punctuations)
 
 	return processed_docs
