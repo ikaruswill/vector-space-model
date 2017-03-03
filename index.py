@@ -1,5 +1,6 @@
 from nltk.tokenize import word_tokenize
 from nltk.stem.porter import PorterStemmer
+from collections import Counter
 import getopt
 import sys
 import os
@@ -12,12 +13,12 @@ import operator
 # Dictionary is a dictionary of {term: {index: i, doc_freq: n}}
 # Postings is a dictionary of {term:{interval: x, doc_ids: list(doc_ids)}}
 
-# takes in a dict of doc_id: doc items
+# takes in a dict of doc_id: Counter({term: freq}) items
 # returns a dict of {term: term_dict}; term_dict is a dict of {index:i}
 def build_dict(docs):
 	dictionary = set()
 	for doc_id, doc in docs.items():
-		dictionary.update(set(doc))
+		dictionary.update(doc.keys())
 
 	dictionary_ordered = list(dictionary) + ['*']
 	dictionary_ordered.sort()
@@ -55,14 +56,14 @@ def init_postings(dictionary):
 
 # 	return skip_pointers
 
-# takes in dict of doc_id:set(processed_doc)
+# takes in dict of doc_id: Counter({term: freq})
 # takes in initialized postings dict of term: posting_dict
 # returns dict of postings term: posting_dict; posting_dict is a dict {'interval': x, 'doc_ids': [doc_ids]}
 def populate_postings_and_skip(docs, postings):
 	for doc_id, doc in sorted(docs.items(), key=lambda x:int(operator.itemgetter(0)(x))):
-		for term in set(doc):
-			postings[term]['doc_ids'].append(doc_id)
-		postings['*']['doc_ids'].append(doc_id)
+		for term, freq in doc.items():
+			postings[term]['doc_ids'].append((doc_id, freq))
+		postings['*']['doc_ids'].append(doc_id) # NEEDS REWORK
 
 	for term, posting in postings.items():
 		posting_len = len(postings[term]['doc_ids'])
@@ -109,7 +110,7 @@ def save_postings(postings):
 			f.write(pickled_posting)
 
 # takes in dict of doc_id: string(doc)
-# returns tokenized, stemmed, punctuation-filtered dict of doc_id: [preprocessed_tokens]
+# returns tokenized, stemmed, punctuation-filtered dict of doc_id: Counter({term: freq})
 def preprocess(docs):
 	stemmer = PorterStemmer()
 	punctuations = set(string.punctuation)
@@ -117,7 +118,7 @@ def preprocess(docs):
 	for doc_id, doc in docs.items():
 		# try to remove terms start and end with number
 		# processed_docs[doc_id] = set([stemmer.stem(token) for token in word_tokenize(doc.lower()) if not token[0].isdigit() or not token[-1].isdigit()])
-		processed_docs[doc_id] = [stemmer.stem(token) for token in word_tokenize(doc.lower()) if token not in punctuations]
+		processed_docs[doc_id] = Counter([stemmer.stem(token) for token in word_tokenize(doc.lower()) if token not in punctuations])
 	return processed_docs
 
 def usage():
