@@ -40,22 +40,6 @@ def init_postings(dictionary):
 
 	return postings
 
-# def build_skip_pointers(postings):
-# 	skip_pointers = {}
-# 	for term, posting_list in postings.items():
-# 		postings_len = len(posting_list)
-# 		if postings_len > 3:
-# 			pointer_count = math.floor(math.sqrt(postings_len))
-# 			pointer_interval = math.floor(postings_len / pointer_count)
-# 			pointers = []
-# 			skip_pointers[term] = [i for i in range(pointer_interval - 1, postings_len, pointer_interval)]
-# 		elif postings_len == 3:
-# 			skip_pointers[term] = [2]
-# 		else:
-# 			skip_pointers[term] = []
-
-# 	return skip_pointers
-
 # takes in dict of doc_id: Counter({term: freq})
 # takes in initialized postings dict of term: posting_dict
 # returns dict of postings term: posting_dict; posting_dict is a dict {'interval': x, 'doc_ids': [doc_ids]}
