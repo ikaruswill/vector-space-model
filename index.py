@@ -94,7 +94,7 @@ def save_postings(postings):
 			f.write(pickled_posting)
 
 # takes in dict of doc_id: string(doc)
-# returns tokenized, stemmed, punctuation-filtered dict of doc_id: Counter({term: freq})
+# returns tokenized, stemmed, punctuation-filtered dict of doc_id: [tokens]
 def preprocess(docs):
 	stemmer = PorterStemmer()
 	punctuations = set(string.punctuation)
@@ -102,8 +102,24 @@ def preprocess(docs):
 	for doc_id, doc in docs.items():
 		# try to remove terms start and end with number
 		# processed_docs[doc_id] = set([stemmer.stem(token) for token in word_tokenize(doc.lower()) if not token[0].isdigit() or not token[-1].isdigit()])
-		processed_docs[doc_id] = Counter([stemmer.stem(token) for token in word_tokenize(doc.lower()) if token not in punctuations])
+		processed_docs[doc_id] = [stemmer.stem(token) for token in word_tokenize(doc.lower()) if token not in punctuations]
 	return processed_docs
+
+# takes in dict of doc_id: [tokens]
+# returns a dict of doc_id: Counter({term: freq}) items
+def count_terms(docs):
+	processed_docs = {}
+	for doc_id, doc in docs.items():
+		processed_docs[doc_id] = Counter(doc)
+	return processed_docs
+
+# takes in dict of doc_id: [tokens]
+# returns a dict of doc_id: length
+def build_and_populate_lengths(docs):
+	lengths = {}
+	for doc_id, doc in docs.items():
+		lengths[doc_id] = len(doc)
+	return lengths
 
 def usage():
 	print("usage: " + sys.argv[0] + " -i directory-of-documents -d dictionary-file -p postings-file")
