@@ -1,5 +1,6 @@
 from nltk.tokenize import word_tokenize
 from nltk.stem.porter import PorterStemmer
+from collections import Counter
 import getopt
 import sys
 import os
@@ -14,12 +15,12 @@ import random
 # Dictionary is a dictionary of {term: {index: i, doc_freq: n}}
 # Postings is a dictionary of {term: {interval: x, doc_ids: list(doc_ids)}}
 
-# takes in a dict of doc_id: doc items
+# takes in a dict of doc_id: Counter({term: freq}) items
 # returns a dict of {term: term_dict}; term_dict is a dict of {index:i}
 def build_dict(docs):
 	dictionary = set()
 	for doc_id, doc in docs.items():
-		dictionary.update(doc)
+		dictionary.update(doc.keys())
 
 	dictionary_ordered = list(dictionary) + ['*']
 	dictionary_ordered.sort()
@@ -41,30 +42,14 @@ def init_postings(dictionary):
 
 	return postings
 
-# def build_skip_pointers(postings):
-# 	skip_pointers = {}
-# 	for term, posting_list in postings.items():
-# 		postings_len = len(posting_list)
-# 		if postings_len > 3:
-# 			pointer_count = math.floor(math.sqrt(postings_len))
-# 			pointer_interval = math.floor(postings_len / pointer_count)
-# 			pointers = []
-# 			skip_pointers[term] = [i for i in range(pointer_interval - 1, postings_len, pointer_interval)]
-# 		elif postings_len == 3:
-# 			skip_pointers[term] = [2]
-# 		else:
-# 			skip_pointers[term] = []
-
-# 	return skip_pointers
-
-# takes in dict of doc_id:set(processed_doc)
+# takes in dict of doc_id: Counter({term: freq})
 # takes in initialized postings dict of term: posting_dict
 # returns dict of postings term: posting_dict; posting_dict is a dict {'interval': x, 'doc_ids': [doc_ids]}
 def populate_postings_and_skip(docs, postings):
 	for doc_id, doc in sorted(docs.items(), key=lambda x:int(operator.itemgetter(0)(x))):
-		for term in set(doc):
-			postings[term]['doc_ids'].append(doc_id)
-		postings['*']['doc_ids'].append(doc_id)
+		for term, freq in doc.items():
+			postings[term]['doc_ids'].append((doc_id, freq))
+		postings['*']['doc_ids'].append(doc_id) # NEEDS REWORK
 
 	for term, posting in postings.items():
 		posting_len = len(postings[term]['doc_ids'])
@@ -86,9 +71,9 @@ def load_data(dir_doc):
 
 	return docs
 
-def save_dictionary(dictionary):
-	with io.open(dict_path, 'wb') as f:
-		pickle.dump(dictionary, f)
+def save_object(object, path):
+	with io.open(path, 'wb') as f:
+		pickle.dump(object, f)
 
 
 # takes in dict of term: posting_dict. posting_dict is a dict {'interval': x, 'doc_ids': [doc_ids]}
@@ -111,24 +96,40 @@ def save_postings(postings):
 			f.write(pickled_posting)
 
 # takes in dict of doc_id: string(doc)
-# returns tokenized, stemmed, punctuation-filtered dict of doc_id: set(preprocessed_tokens)
+# returns tokenized, stemmed, punctuation-filtered dict of doc_id: [tokens]
 def preprocess(docs):
 	stemmer = PorterStemmer()
 	punctuations = set(string.punctuation)
 	processed_docs = {}
 	for doc_id, doc in docs.items():
-		processed_docs[doc_id] = set([stemmer.stem(token) for token in word_tokenize(doc.lower())])
-		processed_docs[doc_id].difference_update(punctuations)
-
+		# try to remove terms start and end with number
+		# processed_docs[doc_id] = set([stemmer.stem(token) for token in word_tokenize(doc.lower()) if not token[0].isdigit() or not token[-1].isdigit()])
+		processed_docs[doc_id] = [stemmer.stem(token) for token in word_tokenize(doc.lower()) if token not in punctuations]
 	return processed_docs
 
+# takes in dict of doc_id: [tokens]
+# returns a dict of doc_id: Counter({term: freq}) items
+def count_terms(docs):
+	processed_docs = {}
+	for doc_id, doc in docs.items():
+		processed_docs[doc_id] = Counter(doc)
+	return processed_docs
+
+# takes in dict of doc_id: [tokens]
+# returns a dict of doc_id: length
+def build_and_populate_lengths(docs):
+	lengths = {}
+	for doc_id, doc in docs.items():
+		lengths[doc_id] = len(doc)
+	return lengths
+
 def usage():
-	print("usage: " + sys.argv[0] + " -i directory-of-documents -d dictionary-file -p postings-file")
+	print("usage: " + sys.argv[0] + " -i directory-of-documents -d dictionary-file -p postings-file -l lengths-file")
 
 if __name__ == '__main__':
-	dir_doc = dict_path = postings_path = None
+	dir_doc = dict_path = postings_path = lengths_path = None
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], 'i:d:p:')
+		opts, args = getopt.getopt(sys.argv[1:], 'i:d:p:l:')
 	except getopt.GetoptError as err:
 		usage()
 		sys.exit(2)
@@ -139,21 +140,26 @@ if __name__ == '__main__':
 			dict_path = a
 		elif o == '-p':
 			postings_path = a
+		elif o == '-l':
+			lengths_path = a
 		else:
 			assert False, "unhandled option"
-	if dir_doc == None or dict_path == None or postings_path == None:
+	if dir_doc == None or dict_path == None or postings_path == None or lengths_path == None:
 		usage()
 		sys.exit(2)
 
 	docs = load_data(dir_doc)
 	docs = preprocess(docs)
+	lengths = build_and_populate_lengths(docs)
+	docs = count_terms(docs)
 	dictionary = build_dict(docs)
 	postings = init_postings(dictionary)
 	populate_postings_and_skip(docs, postings)
 	populate_doc_freq(dictionary, postings)
 	# skip_pointers = build_skip_pointers(postings)
 
-	save_dictionary(dictionary)
+	save_object(dictionary, dict_path)
+	save_object(lengths, lengths_path)
 	save_postings(postings)
 
 	print('++ 3 Random items in docs ++')
