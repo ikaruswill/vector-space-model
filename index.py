@@ -180,9 +180,3 @@ if __name__ == '__main__':
 	print('++ 3 Random items in lengths ++')
 	for i in range(3):
 		print(random.choice(list(lengths.items())))
-
-	print('++ Wildcard dict ++')
-	print(dictionary['*'])
-	print('++ Wildcard postings ++')
-	print(postings['*'])
-	print('doc_freq:', dictionary['*']['doc_freq'], 'actual:', len(postings['*']['doc_ids']))
