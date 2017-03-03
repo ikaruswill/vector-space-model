@@ -20,7 +20,7 @@ def build_dict(docs):
 	for doc_id, doc in docs.items():
 		dictionary.update(doc.keys())
 
-	dictionary_ordered = list(dictionary) + ['*']
+	dictionary_ordered = list(dictionary)
 	dictionary_ordered.sort()
 
 	dictionary = {}
@@ -47,7 +47,6 @@ def populate_postings_and_skip(docs, postings):
 	for doc_id, doc in sorted(docs.items(), key=lambda x:int(operator.itemgetter(0)(x))):
 		for term, freq in doc.items():
 			postings[term]['doc_ids'].append((doc_id, freq))
-		postings['*']['doc_ids'].append(doc_id) # NEEDS REWORK
 
 	for term, posting in postings.items():
 		posting_len = len(postings[term]['doc_ids'])
