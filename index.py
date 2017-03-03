@@ -178,6 +178,10 @@ if __name__ == '__main__':
 		print(term, ' ', posting)
 		print('doc_freq:', dictionary[term]['doc_freq'], 'actual:', len(posting['doc_ids']))
 
+	print('++ 3 Random items in lengths ++')
+	for i in range(3):
+		print(random.choice(list(lengths.items())))
+
 	print('++ Wildcard dict ++')
 	print(dictionary['*'])
 	print('++ Wildcard postings ++')
