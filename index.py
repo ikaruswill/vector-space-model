@@ -17,7 +17,7 @@ import operator
 def build_dict(docs):
 	dictionary = set()
 	for doc_id, doc in docs.items():
-		dictionary.update(doc)
+		dictionary.update(set(doc))
 
 	dictionary_ordered = list(dictionary) + ['*']
 	dictionary_ordered.sort()
@@ -109,7 +109,7 @@ def save_postings(postings):
 			f.write(pickled_posting)
 
 # takes in dict of doc_id: string(doc)
-# returns tokenized, stemmed, punctuation-filtered dict of doc_id: set(preprocessed_tokens)
+# returns tokenized, stemmed, punctuation-filtered dict of doc_id: [preprocessed_tokens]
 def preprocess(docs):
 	stemmer = PorterStemmer()
 	punctuations = set(string.punctuation)
@@ -117,9 +117,7 @@ def preprocess(docs):
 	for doc_id, doc in docs.items():
 		# try to remove terms start and end with number
 		# processed_docs[doc_id] = set([stemmer.stem(token) for token in word_tokenize(doc.lower()) if not token[0].isdigit() or not token[-1].isdigit()])
-		processed_docs[doc_id] = set([stemmer.stem(token) for token in word_tokenize(doc.lower())])
-		processed_docs[doc_id].difference_update(punctuations)
-
+		processed_docs[doc_id] = [stemmer.stem(token) for token in word_tokenize(doc.lower()) if token not in punctuations]
 	return processed_docs
 
 def usage():
