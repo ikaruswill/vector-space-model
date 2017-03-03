@@ -122,12 +122,12 @@ def build_and_populate_lengths(docs):
 	return lengths
 
 def usage():
-	print("usage: " + sys.argv[0] + " -i directory-of-documents -d dictionary-file -p postings-file")
+	print("usage: " + sys.argv[0] + " -i directory-of-documents -d dictionary-file -p postings-file -l lengths-file")
 
 if __name__ == '__main__':
-	dir_doc = dict_path = postings_path = None
+	dir_doc = dict_path = postings_path = lengths_path = None
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], 'i:d:p:')
+		opts, args = getopt.getopt(sys.argv[1:], 'i:d:p:l:')
 	except getopt.GetoptError as err:
 		usage()
 		sys.exit(2)
@@ -138,14 +138,18 @@ if __name__ == '__main__':
 			dict_path = a
 		elif o == '-p':
 			postings_path = a
+		elif o == '-l':
+			lengths_path = a
 		else:
 			assert False, "unhandled option"
-	if dir_doc == None or dict_path == None or postings_path == None:
+	if dir_doc == None or dict_path == None or postings_path == None or lengths_path == None:
 		usage()
 		sys.exit(2)
 
 	docs = load_data(dir_doc)
 	docs = preprocess(docs)
+	lengths = build_and_populate_lengths(docs)
+	docs = count_terms(docs)
 	dictionary = build_dict(docs)
 	postings = init_postings(dictionary)
 	populate_postings_and_skip(docs, postings)
