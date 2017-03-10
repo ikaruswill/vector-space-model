@@ -53,7 +53,7 @@ if __name__ == '__main__':
 		elif o == '-o':
 			output_path = a
 		elif o == '-l':
-			output_path = a
+			lengths_path = a
 		else:
 			assert False, "unhandled option"
 	if dict_path == None or postings_path == None or query_path == None or output_path == None or lengths_path == None:
