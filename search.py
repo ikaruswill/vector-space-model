@@ -19,7 +19,7 @@ def usage():
 def getDictionaryEntry(term):
 	stemmer = PorterStemmer()
 	stem = stemmer.stem(term.lower())
-	return {'doc_freq': 0} if dictionary.get(stem) is None else dictionary[stem]
+	return dictionary.get(stem)
 
 def getPosting(index_of_term):
 	# calculate byte offset
