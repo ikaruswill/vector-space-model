@@ -44,7 +44,7 @@ def handleQuery(query):
 				doc_tf_weight = 1 + math.log10(doc_tf)
 				if doc_id not in scores:
 					scores[doc_id] = 0
-				scores[doc_id] += doc_tf_weight * query_tf_weight * idf
+				scores[doc_id] += doc_tf_weight * query_tf_weight * idf # Possible optimization by shifting out multiplication of query_tf_weight and idf
 
 
 	for doc_id, score in scores.items():
