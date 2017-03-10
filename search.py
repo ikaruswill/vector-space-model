@@ -26,7 +26,7 @@ def getPosting(index_of_term):
 def preprocess_query(query):
 	stemmer = PorterStemmer()
 	punctuations = set(string.punctuation)
-	return [stemmer.stem(token) for token in word_tokenize(query) if token not in punctuations]
+	return [stemmer.stem(token) for token in word_tokenize(query.lower()) if token not in punctuations]
 
 def handleQuery(query):
 	query = preprocess_query(query)
