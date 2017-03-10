@@ -147,7 +147,7 @@ if __name__ == '__main__':
 	docs = count_terms(docs)
 	dictionary = build_dict(docs)
 	postings = init_postings(dictionary)
-	populate_postings_and_skip(docs, postings)
+	populate_postings(docs, postings)
 	populate_doc_freq(dictionary, postings)
 
 	save_object(dictionary, dict_path)
