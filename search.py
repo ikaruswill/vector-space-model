@@ -63,6 +63,9 @@ if __name__ == '__main__':
 	with io.open(dict_path, 'rb') as f:
 		dictionary = pickle.load(f)
 
+	with io.open(lengths_path, 'rb') as f:
+		lengths = pickle.load(f)
+
 	# load postings object sizes to calculate seek offset from current position of file
 	postings_file = io.open(postings_path, 'rb')
 	postings_sizes = pickle.load(postings_file)
