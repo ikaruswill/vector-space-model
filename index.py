@@ -42,7 +42,7 @@ def init_postings(dictionary):
 
 # takes in dict of doc_id: Counter({term: freq})
 # takes in initialized postings dict of term: posting_dict
-# returns dict of postings term: posting_dict; posting_dict is a dict {'interval': x, 'doc_ids': [doc_ids]}
+# returns dict of postings term: posting_dict; posting_dict is a dict {'interval': x, 'doc_ids': [(doc_ids, freq)]}
 def populate_postings_and_skip(docs, postings):
 	for doc_id, doc in sorted(docs.items(), key=lambda x:int(operator.itemgetter(0)(x))):
 		for term, freq in doc.items():
@@ -73,7 +73,7 @@ def save_object(object, path):
 		pickle.dump(object, f)
 
 
-# takes in dict of term: posting_dict. posting_dict is a dict {'interval': x, 'doc_ids': [doc_ids]}
+# takes in dict of term: posting_dict. posting_dict is a dict {'interval': x, 'doc_ids': [(doc_ids, freq)]}
 # saves list of object sizes in bytes in sorted order of terms as first object, saves each posting_dict as separate, subsequent objects.
 def save_postings(postings):
 	sizes = []
