@@ -165,11 +165,12 @@ if __name__ == '__main__':
 	print('++ 3 Random items in postings with len > 4, with doc_freq ++')
 	for i in range(3):
 		term, posting = random.choice(list(postings.items()))
-		while len(posting['doc_ids']) < 4:
+		while len(posting) < 4:
 			term, posting = random.choice(list(postings.items()))
 		print(term, ' ', posting)
-		print('doc_freq:', dictionary[term]['doc_freq'], 'actual:', len(posting['doc_ids']))
+		print('doc_freq:', dictionary[term]['doc_freq'], 'actual:', len(posting))
 
 	print('++ 3 Random items in lengths ++')
 	for i in range(3):
-		print(random.choice(list(lengths.items())))
+		doc_id, length = random.choice(list(lengths.items()))
+		print('{', doc_id, ':', length, '}')
