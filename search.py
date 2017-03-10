@@ -28,12 +28,14 @@ def getPosting(index_of_term):
 	posting = pickle.load(postings_file)
 	return posting
 
+def preprocess_query(query):
+	stemmer = PorterStemmer()
+	punctuations = set(string.punctuation)
+	return [stemmer.stem(token) for token in word_tokenize(query) if token not in punctuations]
 
 
 def handleQuery(query):
-	stemmer = PorterStemmer()
-	punctuations = set(string.punctuation)
-	stems = [stemmer.stem(token) for token in word_tokenize(query) if token not in punctuations]
+	query = preprocess_query(query)
 
 if __name__ == '__main__':
 	dict_path = postings_path = query_path = output_path = lengths_path = None
