@@ -112,7 +112,7 @@ def build_and_populate_lengths(docs):
 	for doc_id, doc in docs.items():
 		sum_squares = 0
 		for term, freq in doc.items():
-			sum_squares += math.pow(math.log10(1 + freq), 2)
+			sum_squares += math.pow(1 + math.log10(freq), 2)
 		lengths[doc_id] = math.sqrt(sum_squares)
 
 	return lengths
