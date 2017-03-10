@@ -3,7 +3,9 @@ import getopt
 import sys
 import pickle
 from nltk.stem.porter import PorterStemmer
+from nltk.tokenize import word_tokenize
 import math
+import string
 from copy import deepcopy
 
 dictionary = {}
@@ -102,7 +104,9 @@ def removePostingDocIds(pst1, pst2):
 		}
 
 def handleQuery(query):
-	pass
+	stemmer = PorterStemmer()
+	punctuations = set(string.punctuation)
+	stems = [stemmer.stem(token) for token in word_tokenize(query) if token not in punctuations]
 
 if __name__ == '__main__':
 	dict_path = postings_path = query_path = output_path = None
@@ -140,11 +144,12 @@ if __name__ == '__main__':
 			line = line.strip()
 			if line != '':
 				try:
-					result = handleQuery(query)
+					result = handleQuery(line)
 					output = ' '.join(result)
 					output_file.write(output + '\n')
 				except Exception as e:
 					output_file.write('\n')
+					print('****WARN***** EXCEPTION THROWN', e)
 					continue
 
 	output_file.close()
