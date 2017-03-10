@@ -33,7 +33,7 @@ def handleQuery(query):
 	scores = {} # To be replaced by heapq
 	for term in query:
 		if term in dictionary:
-			dict_entry = dictionary.get(stem)
+			dict_entry = dictionary.get(term)
 			postings_entry = getPosting(dict_entry['index'])
 			idf = math.log10(len(lengths) / dict_entry['doc_freq'])
 			for doc_id, term_freq in postings_entry:
