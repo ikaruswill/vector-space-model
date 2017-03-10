@@ -3,6 +3,7 @@ import sys
 import pickle
 from nltk.stem.porter import PorterStemmer
 from nltk.tokenize import word_tokenize
+from collections import Counter
 import math
 import string
 import operator
@@ -27,22 +28,27 @@ def getPosting(index_of_term):
 def preprocess_query(query):
 	stemmer = PorterStemmer()
 	punctuations = set(string.punctuation)
-	return [stemmer.stem(token) for token in word_tokenize(query.lower()) if token not in punctuations]
+	return Counter([stemmer.stem(token) for token in word_tokenize(query.lower()) if token not in punctuations])
 
 def handleQuery(query):
 	query = preprocess_query(query)
 	scores = {} # To be replaced by heapq
-	for term in query:
+	query_l2_norm = math.sqrt(sum([math.pow(1 + math.log10(query_tf), 2) for t, query_tf in query.items()]))
+	for term, query_tf in query.items():
 		if term in dictionary:
 			dict_entry = dictionary.get(term)
 			postings_entry = getPosting(dict_entry['index'])
 			idf = math.log10(len(lengths) / dict_entry['doc_freq'])
-			for doc_id, term_freq in postings_entry:
-				tf = 1 + math.log10(term_freq)
+			query_tf_weight = 1 + math.log10(query_tf)
+			for doc_id, doc_tf in postings_entry:
+				doc_tf_weight = 1 + math.log10(doc_tf)
 				if doc_id not in scores:
 					scores[doc_id] = 0
-				scores[doc_id] += tf * idf / lengths[doc_id]
+				scores[doc_id] += doc_tf_weight * query_tf_weight * idf
 
+
+	for doc_id, score in scores.items():
+		 scores[doc_id] /= lengths[doc_id] * query_l2_norm
 	return [item[0] for item in sorted(scores.items(), key=lambda x:operator.itemgetter(1)(x), reverse=True)[:10]]
 
 if __name__ == '__main__':
@@ -85,16 +91,10 @@ if __name__ == '__main__':
 		for line in f:
 			line = line.strip()
 			if line != '':
-				try:
-					result = handleQuery(line)
-					output = ' '.join(result)
-					# print('OUTPUT', output)
-					output_file.write(output + '\n')
-				except Exception as e:
-					output_file.write('\n')
-					print('****WARN***** EXCEPTION THROWN', e)
-					continue
-
+				result = handleQuery(line)
+				output = ' '.join(result)
+				print('OUTPUT', output)
+				output_file.write(output + '\n')
 	output_file.close()
 	postings_file.close()
 
