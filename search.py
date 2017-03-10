@@ -40,7 +40,7 @@ def handleQuery(query):
 				tf = 1 + math.log10(term_freq)
 				if doc_id not in scores:
 					scores[doc_id] = 0
-				scores[doc_id] += tf * idf
+				scores[doc_id] += tf * idf / lengths[doc_id]
 
 	pass # Return top 10
 
