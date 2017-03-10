@@ -4,7 +4,6 @@ from collections import Counter
 import getopt
 import sys
 import os
-import io
 import string
 import pickle
 import math
@@ -13,7 +12,7 @@ import operator
 import random
 
 # Dictionary is a dictionary of {term: {index: i, doc_freq: n}}
-# Postings is a dictionary of {term:{interval: x, doc_ids: [(doc_id, freq), ...]}}
+# Postings is a dictionary of {term:[(doc_id, freq), ...]}
 
 # takes in a dict of doc_id: Counter({term: freq}) items
 # returns a dict of {term: {index: i}}
@@ -59,13 +58,13 @@ def load_data(dir_doc):
 	for dirpath, dirnames, filenames in os.walk(dir_doc):
 		for name in filenames:
 			file = os.path.join(dirpath, name)
-			with io.open(file, 'r') as f:
+			with open(file, 'r') as f:
 				docs[name] = f.read()
 
 	return docs
 
 def save_object(object, path):
-	with io.open(path, 'wb') as f:
+	with open(path, 'wb') as f:
 		pickle.dump(object, f)
 
 
@@ -83,7 +82,7 @@ def save_postings(postings):
 		sizes.append(cumulative)
 		pickled_postings.append(pickled_posting)
 
-	with io.open(postings_path, 'wb') as f:
+	with open(postings_path, 'wb') as f:
 		pickle.dump(sizes, f)
 		for pickled_posting in pickled_postings:
 			f.write(pickled_posting)
@@ -115,7 +114,7 @@ def build_and_populate_lengths(docs):
 	for doc_id, doc in docs.items():
 		sum_squares = 0
 		for term, freq in doc.items():
-			sum_squares += math.pow(math.log10(1 + freq), 2)
+			sum_squares += math.pow(1 + math.log10(freq), 2)
 		lengths[doc_id] = math.sqrt(sum_squares)
 
 	return lengths

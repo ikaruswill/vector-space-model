@@ -1,5 +1,3 @@
-from nltk.stem.porter import PorterStemmer
-import io
 import getopt
 import sys
 import pickle
@@ -7,7 +5,6 @@ from nltk.stem.porter import PorterStemmer
 from nltk.tokenize import word_tokenize
 import math
 import string
-from copy import deepcopy
 
 dictionary = {}
 postings_file = None
@@ -16,12 +13,12 @@ starting_byte_offset = 0
 all_doc_ids = []
 
 def usage():
-	print("usage: " + sys.argv[0] + " -d dictionary-file -p postings-file -q file-of-queries -o output-file-of-results")
+	print("usage: " + sys.argv[0] + " -d dictionary-file -p postings-file -q file-of-queries -l lengths-file -o output-file-of-results")
 
 def getDictionaryEntry(term):
 	stemmer = PorterStemmer()
 	stem = stemmer.stem(term.lower())
-	return {'doc_freq': 0} if dictionary.get(stem) is None else dictionary[stem]
+	return dictionary.get(stem)
 
 def getPosting(index_of_term):
 	# calculate byte offset
@@ -31,14 +28,30 @@ def getPosting(index_of_term):
 	posting = pickle.load(postings_file)
 	return posting
 
-def getInterval(posting_len):
-	return 0 if posting_len == 0 else math.floor((posting_len - 1) / math.floor(math.sqrt(posting_len)))
-
-
-def handleQuery(query):
+def preprocess_query(query):
 	stemmer = PorterStemmer()
 	punctuations = set(string.punctuation)
-	stems = [stemmer.stem(token) for token in word_tokenize(query) if token not in punctuations]
+	return [stemmer.stem(token) for token in word_tokenize(query) if token not in punctuations]
+
+def handleQuery(query):
+	query = preprocess_query(query)
+	scores = {} # To be replaced by heapq
+	for term in query:
+		dict_entry = getDictionaryEntry(term)
+		postings_entry = getPosting(dict_entry['index'])
+		idf = math.log10(len(lengths) / dict_entry['doc_freq'])
+		for doc_id, term_freq in postings_entry:
+			tf = 1 + math.log10(term_freq)
+			if doc_id not in scores:
+				scores[doc_id] = 0
+			scores[doc_id] += tf * idf
+
+	pass # Return top 10
+
+
+
+
+
 
 if __name__ == '__main__':
 	dict_path = postings_path = query_path = output_path = lengths_path = None
@@ -57,23 +70,26 @@ if __name__ == '__main__':
 		elif o == '-o':
 			output_path = a
 		elif o == '-l':
-			output_path = a
+			lengths_path = a
 		else:
 			assert False, "unhandled option"
 	if dict_path == None or postings_path == None or query_path == None or output_path == None or lengths_path == None:
 		usage()
 		sys.exit(2)
 
-	with io.open(dict_path, 'rb') as f:
+	with open(dict_path, 'rb') as f:
 		dictionary = pickle.load(f)
 
+	with open(lengths_path, 'rb') as f:
+		lengths = pickle.load(f)
+
 	# load postings object sizes to calculate seek offset from current position of file
-	postings_file = io.open(postings_path, 'rb')
+	postings_file = open(postings_path, 'rb')
 	postings_sizes = pickle.load(postings_file)
 	starting_byte_offset = postings_file.tell()
 
-	output_file = io.open(output_path, 'w')
-	with io.open(query_path, 'r') as f:
+	output_file = open(output_path, 'w')
+	with open(query_path, 'r') as f:
 		for line in f:
 			line = line.strip()
 			if line != '':
