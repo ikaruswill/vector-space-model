@@ -11,10 +11,10 @@ import math
 import operator
 
 # Dictionary is a dictionary of {term: {index: i, doc_freq: n}}
-# Postings is a dictionary of {term:{interval: x, doc_ids: list(doc_ids)}}
+# Postings is a dictionary of {term:{interval: x, doc_ids: [(doc_id, freq), ...]}}
 
 # takes in a dict of doc_id: Counter({term: freq}) items
-# returns a dict of {term: term_dict}; term_dict is a dict of {index:i}
+# returns a dict of {term: {index: i}}
 def build_dict(docs):
 	dictionary = set()
 	for doc_id, doc in docs.items():
@@ -30,31 +30,25 @@ def build_dict(docs):
 	return dictionary
 
 # takes in a list of terms
-# returns a dict of term: posting dict objects
+# returns a dict of term: []
 def init_postings(dictionary):
 	postings = {}
 	for term in dictionary:
-		postings[term] = {}
-		postings[term]['interval'] = 0
-		postings[term]['doc_ids'] = []
+		postings[term] = []
 
 	return postings
 
 # takes in dict of doc_id: Counter({term: freq})
 # takes in initialized postings dict of term: posting_dict
-# returns dict of postings term: posting_dict; posting_dict is a dict {'interval': x, 'doc_ids': [doc_ids]}
-def populate_postings_and_skip(docs, postings):
+# returns dict of term: [(doc_id, freq), ...]
+def populate_postings(docs, postings):
 	for doc_id, doc in sorted(docs.items(), key=lambda x:int(operator.itemgetter(0)(x))):
 		for term, freq in doc.items():
-			postings[term]['doc_ids'].append((doc_id, freq))
-
-	for term, posting in postings.items():
-		posting_len = len(postings[term]['doc_ids'])
-		postings[term]['interval'] = math.floor((posting_len - 1) / math.floor(math.sqrt(posting_len)))
+			postings[term].append((doc_id, freq))
 
 def populate_doc_freq(dictionary, postings):
 	for term, term_dict in dictionary.items():
-		term_dict['doc_freq'] = len(postings[term]['doc_ids'])
+		term_dict['doc_freq'] = len(postings[term])
 
 # takes in directory of corpus
 # returns dict of doc_id: string(doc)
@@ -73,7 +67,7 @@ def save_object(object, path):
 		pickle.dump(object, f)
 
 
-# takes in dict of term: posting_dict. posting_dict is a dict {'interval': x, 'doc_ids': [doc_ids]}
+# takes in dict of term: posting_dict. posting_dict is a dict {'interval': x, 'doc_ids': [(doc_id, freq), ...]}
 # saves list of object sizes in bytes in sorted order of terms as first object, saves each posting_dict as separate, subsequent objects.
 def save_postings(postings):
 	sizes = []
@@ -153,7 +147,6 @@ if __name__ == '__main__':
 	postings = init_postings(dictionary)
 	populate_postings_and_skip(docs, postings)
 	populate_doc_freq(dictionary, postings)
-	# skip_pointers = build_skip_pointers(postings)
 
 	save_object(dictionary, dict_path)
 	save_object(lengths, lengths_path)
