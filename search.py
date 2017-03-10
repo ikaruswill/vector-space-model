@@ -5,6 +5,7 @@ from nltk.stem.porter import PorterStemmer
 from nltk.tokenize import word_tokenize
 import math
 import string
+import operator
 
 dictionary = {}
 postings_file = None
