@@ -91,14 +91,9 @@ if __name__ == '__main__':
 		for line in f:
 			line = line.strip()
 			if line != '':
-				try:
-					result = handleQuery(line)
-					output = ' '.join(result)
-					output_file.write(output + '\n')
-				except Exception as e:
-					output_file.write('\n')
-					print('****WARN***** EXCEPTION THROWN', e)
-					continue
-
+				result = handleQuery(line)
+				output = ' '.join(result)
+				print('OUTPUT', output)
+				output_file.write(output + '\n')
 	output_file.close()
 	postings_file.close()
