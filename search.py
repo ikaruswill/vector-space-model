@@ -33,7 +33,7 @@ def preprocess_query(query):
 def handleQuery(query):
 	query = preprocess_query(query)
 	scores = {} # To be replaced by heapq
-	query_l2_norm = math.sqrt(sum([math.pow(1 + math.log10(query_tf), 2) for t, query_tf in query.items()]))
+	query_weights = []
 	for term, query_tf in query.items():
 		if term in dictionary:
 			dict_entry = dictionary.get(term)
@@ -44,8 +44,10 @@ def handleQuery(query):
 				doc_tf_weight = 1 + math.log10(doc_tf)
 				if doc_id not in scores:
 					scores[doc_id] = 0
-				scores[doc_id] += doc_tf_weight * query_tf_weight * idf # Possible optimization by shifting out multiplication of query_tf_weight and idf
+				scores[doc_id] += doc_tf_weight * query_tf_weight * idf
+			query_weights.append(query_tf_weight * idf)
 
+	query_l2_norm = math.sqrt(sum([math.pow(1 + math.log10(query_weight), 2) for query_weight in query_weights]))
 
 	for doc_id, score in scores.items():
 		 scores[doc_id] /= lengths[doc_id] * query_l2_norm
