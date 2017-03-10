@@ -33,9 +33,25 @@ def preprocess_query(query):
 	punctuations = set(string.punctuation)
 	return [stemmer.stem(token) for token in word_tokenize(query) if token not in punctuations]
 
-
 def handleQuery(query):
 	query = preprocess_query(query)
+	scores = {} # To be replaced by heapq
+	for term in query:
+		dict_entry = getDictionaryEntry(term)
+		postings_entry = getPosting(dict_entry['index'])
+		idf = math.log10(len(lengths) / dict_entry['doc_freq'])
+		for doc_id, term_freq in postings_entry:
+			tf = 1 + math.log10(term_freq)
+			if doc_id not in scores:
+				scores[doc_id] = 0
+			scores[doc_id] += tf * idf
+
+	pass # Return top 10
+
+
+
+
+
 
 if __name__ == '__main__':
 	dict_path = postings_path = query_path = output_path = lengths_path = None
