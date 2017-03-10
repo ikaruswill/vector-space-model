@@ -13,7 +13,7 @@ starting_byte_offset = 0
 all_doc_ids = []
 
 def usage():
-	print("usage: " + sys.argv[0] + " -d dictionary-file -p postings-file -q file-of-queries -o output-file-of-results")
+	print("usage: " + sys.argv[0] + " -d dictionary-file -p postings-file -q file-of-queries -l lengths-file -o output-file-of-results")
 
 def getDictionaryEntry(term):
 	stemmer = PorterStemmer()
