@@ -31,7 +31,7 @@ def build_dict(docs):
 
 # takes in a list of terms
 # returns a dict of term: []
-def init_postings(dictionary):
+def build_postings(dictionary):
 	postings = {}
 	for term in dictionary:
 		postings[term] = []
@@ -144,7 +144,7 @@ if __name__ == '__main__':
 	lengths = build_and_populate_lengths(docs)
 	docs = count_terms(docs)
 	dictionary = build_dict(docs)
-	postings = init_postings(dictionary)
+	postings = build_postings(dictionary)
 	populate_postings(docs, postings)
 	populate_doc_freq(dictionary, postings)
 
