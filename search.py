@@ -29,8 +29,6 @@ def getPosting(index_of_term):
 	posting = pickle.load(postings_file)
 	return posting
 
-def getInterval(posting_len):
-	return 0 if posting_len == 0 else math.floor((posting_len - 1) / math.floor(math.sqrt(posting_len)))
 
 
 def handleQuery(query):
