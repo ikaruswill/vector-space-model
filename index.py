@@ -33,7 +33,7 @@ def build_dict(docs):
 
 # takes in a list of terms
 # returns a dict of term: []
-def init_postings(dictionary):
+def build_postings(dictionary):
 	postings = {}
 	for term in dictionary:
 		postings[term] = []
@@ -108,12 +108,16 @@ def count_terms(docs):
 		processed_docs[doc_id] = Counter(doc)
 	return processed_docs
 
-# takes in dict of doc_id: [tokens]
+# takes in dict of doc_id: Counter({term: freq})
 # returns a dict of doc_id: length
 def build_and_populate_lengths(docs):
 	lengths = {}
 	for doc_id, doc in docs.items():
-		lengths[doc_id] = len(doc)
+		sum_squares = 0
+		for term, freq in doc.items():
+			sum_squares += math.pow(math.log10(1 + freq), 2)
+		lengths[doc_id] = math.sqrt(sum_squares)
+
 	return lengths
 
 def usage():
@@ -143,10 +147,10 @@ if __name__ == '__main__':
 
 	docs = load_data(dir_doc)
 	docs = preprocess(docs)
-	lengths = build_and_populate_lengths(docs)
 	docs = count_terms(docs)
+	lengths = build_and_populate_lengths(docs)
 	dictionary = build_dict(docs)
-	postings = init_postings(dictionary)
+	postings = build_postings(dictionary)
 	populate_postings(docs, postings)
 	populate_doc_freq(dictionary, postings)
 
