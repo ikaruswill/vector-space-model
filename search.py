@@ -40,14 +40,9 @@ def handleQuery(query):
 				tf = 1 + math.log10(term_freq)
 				if doc_id not in scores:
 					scores[doc_id] = 0
-				scores[doc_id] += tf * idf
+				scores[doc_id] += tf * idf / lengths[doc_id]
 
-	pass # Return top 10
-
-
-
-
-
+	return [item[0] for item in sorted(scores.items(), key=lambda x:operator.itemgetter(1)(x), reverse=True)[:10]]
 
 if __name__ == '__main__':
 	dict_path = postings_path = query_path = output_path = lengths_path = None
