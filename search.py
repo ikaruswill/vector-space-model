@@ -28,21 +28,6 @@ def getPosting(index_of_term):
 	posting = pickle.load(postings_file)
 	return posting
 
-def getPostingFromDictEntry(dict_entry, has_not = False):
-	posting = {}
-	if dict_entry.get('posting') is not None:
-		posting = dict_entry['posting']
-	elif dict_entry.get('index') is not None:
-		posting = getPosting(dict_entry['index'])
-	elif has_not:
-		return { 'doc_ids': all_doc_ids }
-	else:
-		return { 'doc_ids': [] }
-
-	if has_not == True:
-		return getNotPosting(posting)
-	return posting
-
 def getInterval(posting_len):
 	return 0 if posting_len == 0 else math.floor((posting_len - 1) / math.floor(math.sqrt(posting_len)))
 
