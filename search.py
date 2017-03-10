@@ -6,7 +6,6 @@ from nltk.stem.porter import PorterStemmer
 from nltk.tokenize import word_tokenize
 import math
 import string
-from copy import deepcopy
 
 dictionary = {}
 postings_file = None

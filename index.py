@@ -4,7 +4,6 @@ from collections import Counter
 import getopt
 import sys
 import os
-import io
 import string
 import pickle
 import math
@@ -57,13 +56,13 @@ def load_data(dir_doc):
 	for dirpath, dirnames, filenames in os.walk(dir_doc):
 		for name in filenames:
 			file = os.path.join(dirpath, name)
-			with io.open(file, 'r') as f:
+			with open(file, 'r') as f:
 				docs[name] = f.read()
 
 	return docs
 
 def save_object(object, path):
-	with io.open(path, 'wb') as f:
+	with open(path, 'wb') as f:
 		pickle.dump(object, f)
 
 
@@ -81,7 +80,7 @@ def save_postings(postings):
 		sizes.append(cumulative)
 		pickled_postings.append(pickled_posting)
 
-	with io.open(postings_path, 'wb') as f:
+	with open(postings_path, 'wb') as f:
 		pickle.dump(sizes, f)
 		for pickled_posting in pickled_postings:
 			f.write(pickled_posting)
