@@ -41,7 +41,7 @@ def build_postings(dictionary):
 # takes in initialized postings dict of term: posting_dict
 # returns dict of term: [(doc_id, freq), ...]
 def populate_postings(docs, postings):
-	for doc_id, doc in sorted(docs.items(), key=lambda x:int(operator.itemgetter(0)(x))):
+	for doc_id, doc in sorted(docs.items()):
 		for term, freq in doc.items():
 			postings[term].append((doc_id, freq))
 
