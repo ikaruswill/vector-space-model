@@ -10,7 +10,7 @@ import math
 import operator
 
 # Dictionary is a dictionary of {term: {index: i, doc_freq: n}}
-# Postings is a dictionary of {term:{interval: x, doc_ids: [(doc_id, freq), ...]}}
+# Postings is a dictionary of {term:[(doc_id, freq), ...]}
 
 # takes in a dict of doc_id: Counter({term: freq}) items
 # returns a dict of {term: {index: i}}
