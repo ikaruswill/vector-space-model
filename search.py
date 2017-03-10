@@ -15,11 +15,6 @@ all_doc_ids = []
 def usage():
 	print("usage: " + sys.argv[0] + " -d dictionary-file -p postings-file -q file-of-queries -l lengths-file -o output-file-of-results")
 
-def getDictionaryEntry(term):
-	stemmer = PorterStemmer()
-	stem = stemmer.stem(term.lower())
-	return dictionary.get(stem)
-
 def getPosting(index_of_term):
 	# calculate byte offset
 	posting_offset = 0 if index_of_term - 1 < 0 else postings_sizes[index_of_term - 1]
@@ -31,20 +26,21 @@ def getPosting(index_of_term):
 def preprocess_query(query):
 	stemmer = PorterStemmer()
 	punctuations = set(string.punctuation)
-	return [stemmer.stem(token) for token in word_tokenize(query) if token not in punctuations]
+	return [stemmer.stem(token) for token in word_tokenize(query.lower()) if token not in punctuations]
 
 def handleQuery(query):
 	query = preprocess_query(query)
 	scores = {} # To be replaced by heapq
 	for term in query:
-		dict_entry = getDictionaryEntry(term)
-		postings_entry = getPosting(dict_entry['index'])
-		idf = math.log10(len(lengths) / dict_entry['doc_freq'])
-		for doc_id, term_freq in postings_entry:
-			tf = 1 + math.log10(term_freq)
-			if doc_id not in scores:
-				scores[doc_id] = 0
-			scores[doc_id] += tf * idf
+		if term in dictionary:
+			dict_entry = dictionary.get(stem)
+			postings_entry = getPosting(dict_entry['index'])
+			idf = math.log10(len(lengths) / dict_entry['doc_freq'])
+			for doc_id, term_freq in postings_entry:
+				tf = 1 + math.log10(term_freq)
+				if doc_id not in scores:
+					scores[doc_id] = 0
+				scores[doc_id] += tf * idf
 
 	pass # Return top 10
 
