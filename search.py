@@ -15,11 +15,6 @@ all_doc_ids = []
 def usage():
 	print("usage: " + sys.argv[0] + " -d dictionary-file -p postings-file -q file-of-queries -l lengths-file -o output-file-of-results")
 
-def getDictionaryEntry(term):
-	stemmer = PorterStemmer()
-	stem = stemmer.stem(term.lower())
-	return dictionary.get(stem)
-
 def getPosting(index_of_term):
 	# calculate byte offset
 	posting_offset = 0 if index_of_term - 1 < 0 else postings_sizes[index_of_term - 1]
@@ -37,7 +32,7 @@ def handleQuery(query):
 	query = preprocess_query(query)
 	scores = {} # To be replaced by heapq
 	for term in query:
-		dict_entry = getDictionaryEntry(term)
+		dict_entry = dictionary.get(stem)
 		postings_entry = getPosting(dict_entry['index'])
 		idf = math.log10(len(lengths) / dict_entry['doc_freq'])
 		for doc_id, term_freq in postings_entry:
