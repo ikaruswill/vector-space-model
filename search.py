@@ -43,63 +43,9 @@ def getPostingFromDictEntry(dict_entry, has_not = False):
 		return getNotPosting(posting)
 	return posting
 
-def findMatch(idx, pst, target_doc_id):
-	has_skip = idx % (pst['interval'] + 1) == 0
-	new_idx = min( idx + pst['interval'] + 1, len(pst['doc_ids']) - 1 ) if has_skip else idx + 1
-
-	if new_idx >= len(pst['doc_ids']) or int(target_doc_id) > int(pst['doc_ids'][new_idx]):
-		return new_idx, None
-
-	#loop between idx and new_idx (exclusive) to find if there's a match
-	for i in range(idx + 1, new_idx):
-		if target_doc_id == pst['doc_ids'][i]:
-			return i + 1, target_doc_id
-
-		if int(target_doc_id) < int(pst['doc_ids'][i]):
-			return i, None
-
-	return new_idx, None
-
-def getCommonPosting(pst1, pst2):
-	idx1 = 0
-	idx2 = 0
-	new_doc_ids = []
-	while idx1 < len(pst1['doc_ids']) and idx2 < len(pst2['doc_ids']):
-		pst1_doc_id = pst1['doc_ids'][idx1]
-		pst2_doc_id = pst2['doc_ids'][idx2]
-
-		if pst1_doc_id == pst2_doc_id:
-			new_doc_ids.append(pst1_doc_id)
-			idx1 += 1
-			idx2 += 1
-		elif idx1 == len(pst1['doc_ids']) - 1 and idx2 == len(pst2['doc_ids']) - 1:
-			break
-		elif int(pst1_doc_id) > int(pst2_doc_id):
-			idx2, doc_id = findMatch(idx2, pst2, pst1_doc_id)
-			if doc_id is not None:
-				new_doc_ids.append(doc_id)
-				idx1 += 1
-		else:
-			idx1, doc_id = findMatch(idx1, pst1, pst2_doc_id)
-			if doc_id is not None:
-				new_doc_ids.append(doc_id)
-				idx2 += 1
-
-	# return new posting
-	return {
-			'doc_ids': new_doc_ids,
-			'interval': getInterval(len(new_doc_ids))
-		}
-
 def getInterval(posting_len):
 	return 0 if posting_len == 0 else math.floor((posting_len - 1) / math.floor(math.sqrt(posting_len)))
 
-def removePostingDocIds(pst1, pst2):
-	new_doc_ids = [doc_id for doc_id in pst1['doc_ids'] if doc_id not in pst2['doc_ids']]
-	return {
-			'doc_ids': new_doc_ids,
-			'interval': getInterval(len(new_doc_ids))
-		}
 
 def handleQuery(query):
 	pass
