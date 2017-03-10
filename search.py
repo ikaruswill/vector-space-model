@@ -1,4 +1,3 @@
-import io
 import getopt
 import sys
 import pickle
@@ -60,19 +59,19 @@ if __name__ == '__main__':
 		usage()
 		sys.exit(2)
 
-	with io.open(dict_path, 'rb') as f:
+	with open(dict_path, 'rb') as f:
 		dictionary = pickle.load(f)
 
-	with io.open(lengths_path, 'rb') as f:
+	with open(lengths_path, 'rb') as f:
 		lengths = pickle.load(f)
 
 	# load postings object sizes to calculate seek offset from current position of file
-	postings_file = io.open(postings_path, 'rb')
+	postings_file = open(postings_path, 'rb')
 	postings_sizes = pickle.load(postings_file)
 	starting_byte_offset = postings_file.tell()
 
-	output_file = io.open(output_path, 'w')
-	with io.open(query_path, 'r') as f:
+	output_file = open(output_path, 'w')
+	with open(query_path, 'r') as f:
 		for line in f:
 			line = line.strip()
 			if line != '':
