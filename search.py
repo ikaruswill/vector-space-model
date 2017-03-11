@@ -57,10 +57,10 @@ def handleQuery(query):
 	scores_heap = [(-score, doc_id) for doc_id, score in scores.items()]
 	heapq.heapify(scores_heap)
 
-	result = []
-	for i in range(10):
-		result.append(heapq.heappop(scores_heap)[1])
-	return result
+	if len(scores_heap) >= 10:
+		return [heapq.heappop(scores_heap)[1] for i in range(10)]
+	else:
+		return [heapq.heappop(scores_heap)[1] for i in range(len(scores_heap))]
 
 if __name__ == '__main__':
 	dict_path = postings_path = query_path = output_path = lengths_path = None
