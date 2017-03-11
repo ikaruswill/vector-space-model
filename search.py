@@ -108,7 +108,4 @@ if __name__ == '__main__':
 				output_file.write(output + '\n')
 	output_file.close()
 	postings_file.close()
-
-	print('++ 3 Random items in dictionary ++')
-	for i in range(3):
-		print(random.choice(list(dictionary.items())))
+	
