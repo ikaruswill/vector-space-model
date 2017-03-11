@@ -57,6 +57,9 @@ def load_data(dir_doc):
 	docs = {}
 	for dirpath, dirnames, filenames in os.walk(dir_doc):
 		for name in filenames:
+			# use to generate with first 30 documents
+			# if int(name) > 50:
+			# 	continue
 			file = os.path.join(dirpath, name)
 			with open(file, 'r') as f:
 				docs[name] = f.read()
@@ -157,23 +160,33 @@ if __name__ == '__main__':
 	save_object(lengths, lengths_path)
 	save_postings(postings)
 
-	print('++ 3 Random items in docs ++')
-	for i in range(3):
-		print(random.choice(list(docs.items())))
+	# get dictionary stem with doc freq in range
+	# for term, info in dictionary.items():
+	# 	if info['doc_freq'] > 1 and info['doc_freq'] < 5:
+	# 		print(term)
 
-	print('++ 3 Random items in dictionary ++')
-	for i in range(3):
-		print(random.choice(list(dictionary.items())))
+	# get postings with specific stems
+	# for term, info in postings.items():
+	# 	if term in ['trade', 'analyst','currenc','comput','intern','agricultur','strong','quota','purchas','economi']:
+	# 		print(term, sorted(info, key=lambda t: int(t[0])))
 
-	print('++ 3 Random items in postings with len > 4, with doc_freq ++')
-	for i in range(3):
-		term, posting = random.choice(list(postings.items()))
-		while len(posting) < 4:
-			term, posting = random.choice(list(postings.items()))
-		print(term, ' ', posting)
-		print('doc_freq:', dictionary[term]['doc_freq'], 'actual:', len(posting))
-
-	print('++ 3 Random items in lengths ++')
-	for i in range(3):
-		doc_id, length = random.choice(list(lengths.items()))
-		print('{', doc_id, ':', length, '}')
+	# print('++ 3 Random items in docs ++')
+	# for i in range(3):
+	# 	print(random.choice(list(docs.items())))
+	#
+	# print('++ 3 Random items in dictionary ++')
+	# for i in range(3):
+	# 	print(random.choice(list(dictionary.items())))
+	#
+	# print('++ 3 Random items in postings with len > 4, with doc_freq ++')
+	# for i in range(3):
+	# 	term, posting = random.choice(list(postings.items()))
+	# 	while len(posting) < 4:
+	# 		term, posting = random.choice(list(postings.items()))
+	# 	print(term, ' ', posting)
+	# 	print('doc_freq:', dictionary[term]['doc_freq'], 'actual:', len(posting))
+	#
+	# print('++ 3 Random items in lengths ++')
+	# for i in range(3):
+	# 	doc_id, length = random.choice(list(lengths.items()))
+	# 	print('{', doc_id, ':', length, '}')
