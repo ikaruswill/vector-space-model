@@ -7,6 +7,8 @@ from collections import Counter
 import math
 import string
 import operator
+import heapq
+from pprint import pprint
 
 dictionary = {}
 postings_file = None
@@ -33,7 +35,7 @@ def preprocess_query(query):
 def handleQuery(query):
 	query = preprocess_query(query)
 	scores = {} # To be replaced by heapq
-	query_l2_norm = math.sqrt(sum([math.pow(1 + math.log10(query_tf), 2) for t, query_tf in query.items()]))
+	query_weights = []
 	for term, query_tf in query.items():
 		if term in dictionary:
 			dict_entry = dictionary.get(term)
@@ -45,11 +47,18 @@ def handleQuery(query):
 				if doc_id not in scores:
 					scores[doc_id] = 0
 				scores[doc_id] += doc_tf_weight * query_tf_weight * idf
+			query_weights.append(query_tf_weight * idf)
 
-
+	query_l2_norm = math.sqrt(sum([math.pow(1 + math.log10(query_weight), 2) for query_weight in query_weights]))
+	scores_heap = [] #heapq by default is min heap, so * -1 to all score value
 	for doc_id, score in scores.items():
-		 scores[doc_id] /= lengths[doc_id] * query_l2_norm
-	return [item[0] for item in sorted(scores.items(), key=lambda x:operator.itemgetter(1)(x), reverse=True)[:10]]
+		scores[doc_id] /= lengths[doc_id] * query_l2_norm
+		heapq.heappush(scores_heap, (-scores[doc_id], doc_id))
+
+	result = []
+	for i in range(10):
+		result.append(heapq.heappop(scores_heap)[1])
+	return result
 
 if __name__ == '__main__':
 	dict_path = postings_path = query_path = output_path = lengths_path = None
