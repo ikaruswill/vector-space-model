@@ -22,7 +22,7 @@ class ScoreDocIDPair(object):
 		self.doc_id = doc_id
 
 	def __lt__(self, other):
-		return self.doc_id < other.doc_id if self.score == other.score else self.score < other.score
+		return int(self.doc_id) < int(other.doc_id) if self.score == other.score else self.score < other.score
 
 	def __repr__(self):
 		return '%6s : %.10f' % (self.doc_id, self.score)
