@@ -50,10 +50,12 @@ def handleQuery(query):
 			query_weights.append(query_tf_weight * idf)
 
 	query_l2_norm = math.sqrt(sum([math.pow(1 + math.log10(query_weight), 2) for query_weight in query_weights]))
-	scores_heap = [] #heapq by default is min heap, so * -1 to all score value
 	for doc_id, score in scores.items():
 		scores[doc_id] /= lengths[doc_id] * query_l2_norm
-		heapq.heappush(scores_heap, (-scores[doc_id], doc_id))
+
+	#heapq by default is min heap, so * -1 to all score value
+	scores_heap = [(-score, doc_id) for doc_id, score in scores.items()]
+	heapq.heapify(scores_heap)
 
 	result = []
 	for i in range(10):
