@@ -16,6 +16,20 @@ postings_sizes = []
 starting_byte_offset = 0
 all_doc_ids = []
 
+class ScoreDocIDPair(object):
+	def __init__(self, score, doc_id):
+		self.score = score
+		self.doc_id = doc_id
+
+	def __lt__(self, other):
+		return self.doc_id < other.doc_id if self.score == other.score else self.score < other.score
+
+	def __repr__(self):
+		return '%6s : %.10f' % (self.doc_id, self.score)
+
+	def __str__(self):
+		return '%6s : %.10f' % (self.doc_id, self.score)
+
 def usage():
 	print("usage: " + sys.argv[0] + " -d dictionary-file -p postings-file -q file-of-queries -l lengths-file -o output-file-of-results")
 
@@ -54,13 +68,10 @@ def handleQuery(query):
 		scores[doc_id] /= lengths[doc_id] * query_l2_norm
 
 	#heapq by default is min heap, so * -1 to all score value
-	scores_heap = [(-score, doc_id) for doc_id, score in scores.items()]
+	scores_heap = [ScoreDocIDPair(-score, doc_id) for doc_id, score in scores.items()]
 	heapq.heapify(scores_heap)
 
-	if len(scores_heap) >= 10:
-		return [heapq.heappop(scores_heap)[1] for i in range(10)]
-	else:
-		return [heapq.heappop(scores_heap)[1] for i in range(len(scores_heap))]
+	return [heapq.heappop(scores_heap).doc_id for i in range(min(len(scores_heap), 10))]
 
 if __name__ == '__main__':
 	dict_path = postings_path = query_path = output_path = lengths_path = None
