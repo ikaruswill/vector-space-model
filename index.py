@@ -167,8 +167,14 @@ if __name__ == '__main__':
 
 	# get postings with specific stems
 	# for term, info in postings.items():
-	# 	if term in ['trade', 'analyst','currenc','comput','intern','agricultur','strong','quota','purchas','economi']:
-	# 		print(term, sorted(info, key=lambda t: int(t[0])))
+	# 	if term in ['of']:
+	# 		print(term, sorted(info, key=lambda t: -int(t[1])))
+
+	# get doc_l2_norm for doc 1 to 50
+	# temp = []
+	# for i in range(1, 51):
+	# 	if lengths.get(str(i)):
+	# 		print(i, lengths[str(i)])
 
 	# print('++ 3 Random items in docs ++')
 	# for i in range(3):

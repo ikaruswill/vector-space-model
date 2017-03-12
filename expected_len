@@ -1,31 +1,21 @@
-this_cannot_possibly_be_in_dictionary: 0
-NOT this_cannot_possibly_be_in_dictionary: 7769
-Reagan: 153
-NOT Reagan: 7616
-Reagan OR administration: 259
-Reagan AND administration: 98
-Reagan AND NOT administration: 55
-NOT Reagan AND administration: 106
-(NOT Reagan) AND administration: 106
-NOT (Reagan AND administration): 7671
-Reagan AND administration OR USDA: 263
-(Reagan AND administration) OR USDA: 263
-Reagan AND (administration OR USDA): 99
-Reagan AND (administration OR USDA))): 0
-(Reagan AND administration AND USDA) AND (Reagan AND administration AND USDA): 16
-(Reagan AND administration AND USDA) AND NOT (Reagan AND administration AND USDA): 0
-(Reagan AND administration): 98
-(Reagan AND administration) AND (Reagan AND administration AND NOT USDA): 82
-(Reagan AND administration) AND NOT (Reagan AND administration AND NOT USDA): 16
-administration: 204
-administrator: 204
-administer: 7
-administers: 7
-administered: 7
-center: 64
-centre: 40
-central: 381
-do: 361
-does: 253
-did: 421
-done: 71 
+of: 30 9 29 22 12 44 19 27 50 10
+sell: 1
+again: 1
+mine: 22
+high: 45
+john: 29
+in: 30 48 40 12 29 19 46 37 9 18
+to: 22 9 44 42 19 40 48 10 49 12
+it: 22 9 50 48 10 49 44 12 23 27
+for: 42 41 19 13 5 9 10 27 44 40
+said: 22 9 50 42 12 29 48 44 19 10
+intern: 42 13
+agriculture: 19 46 5
+compute: 10 37
+analyst: 18 45
+economic: 47 40
+currency: 47 1
+trade: 47 45 1
+quota: 46 42
+strong: 23 18 45
+purchase: 19 10
