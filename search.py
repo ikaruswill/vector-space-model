@@ -58,7 +58,6 @@ def handleQuery(query):
 			query_tf_weight = 1 + math.log10(query_tf)
 			for doc_id, doc_tf in postings_entry:
 				doc_tf_weight = 1 + math.log10(doc_tf)
-				# print('tf', doc_id, doc_tf_weight)
 				if doc_id not in scores:
 					scores[doc_id] = 0
 				scores[doc_id] += doc_tf_weight * query_tf_weight * idf
@@ -67,8 +66,6 @@ def handleQuery(query):
 	query_l2_norm = math.sqrt(sum([math.pow(1 + math.log10(query_weight), 2) for query_weight in query_weights]))
 	for doc_id, score in scores.items():
 		scores[doc_id] /= lengths[doc_id] * query_l2_norm
-		# print('doc_norm', doc_id, lengths[doc_id])
-		# print('score', doc_id, scores[doc_id])
 
 
 	#heapq by default is min heap, so * -1 to all score value
