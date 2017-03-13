@@ -63,7 +63,7 @@ def handleQuery(query):
 				scores[doc_id] += doc_tf_weight * query_tf_weight * idf
 			query_weights.append(query_tf_weight * idf)
 
-	query_l2_norm = math.sqrt(sum([math.pow(1 + math.log10(query_weight), 2) for query_weight in query_weights]))
+	query_l2_norm = math.sqrt(sum([math.pow(query_weight, 2) for query_weight in query_weights]))
 	for doc_id, score in scores.items():
 		scores[doc_id] /= lengths[doc_id] * query_l2_norm
 
