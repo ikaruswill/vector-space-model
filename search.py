@@ -8,7 +8,6 @@ import math
 import string
 import operator
 import heapq
-from pprint import pprint
 
 dictionary = {}
 postings_file = None
@@ -48,7 +47,7 @@ def preprocess_query(query):
 
 def handleQuery(query):
 	query = preprocess_query(query)
-	scores = {} # To be replaced by heapq
+	scores = {}
 	query_weights = []
 	for term, query_tf in query.items():
 		if term in dictionary:
@@ -115,7 +114,6 @@ if __name__ == '__main__':
 			if line != '':
 				result = handleQuery(line)
 				output = ' '.join(result)
-				print('OUTPUT', output)
 				output_file.write(output + '\n')
 	output_file.close()
 	postings_file.close()
